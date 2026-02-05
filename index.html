@@ -5,33 +5,48 @@
   <title>Golf Planung</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
+    body { margin:0; font-family: Arial, sans-serif; background:#f4f4f4; }
+    header { padding:14px 20px; background:#2c3e50; color:white; font-size:20px; }
+    .buttons { padding:10px 20px; background:white; }
+    button {
+      padding:8px 14px;
+      margin-right:8px;
+      border:none;
+      background:#3498db;
+      color:white;
+      cursor:pointer;
+      border-radius:4px;
     }
-    header {
-      padding: 14px 20px;
-      background: #2c3e50;
-      color: white;
-      font-size: 20px;
-    }
-    iframe {
-      width: 100%;
-      height: 92vh;
-      border: none;
-      display: block;
-    }
+    iframe { width:100%; height:88vh; border:none; display:block; }
   </style>
 </head>
 <body>
 
 <header>Aktuelle Golf Planung</header>
 
-<iframe 
-  src="https://1drv.ms/x/c/8062010bbf1bb3b7/IQQygxHdb6WbQ7Zs_beRbJwuAf8BthohiO-ekRyVi8vvlyI?em=2&wdAllowInteractivity=True&wdHideGridlines=True&wdHideHeaders=True&wdDownloadButton=True&wdInConfigurator=True">
-</iframe>
+<div class="buttons">
+  <button onclick="loadAll()">Alle anzeigen</button>
+  <button onclick="filterOrt('AM')">Nur AM</button>
+  <button onclick="filterOrt('DS')">Nur DS</button>
+  <button onclick="filterOrt('AD')">Nur AD</button>
+</div>
+
+<iframe id="excelFrame"></iframe>
+
+<script>
+const base = "https://1drv.ms/x/c/8062010bbf1bb3b7/IQQygxHdb6WbQ7Zs_beRbJwuAf8BthohiO-ekRyVi8vvlyI?em=2&wdAllowInteractivity=True";
+
+function loadAll() {
+  document.getElementById("excelFrame").src = base;
+}
+
+function filterOrt(ort) {
+  document.getElementById("excelFrame").src =
+    base + "&wdFilter=Ort%20eq%20'" + ort + "'";
+}
+
+loadAll();
+</script>
 
 </body>
 </html>
-
