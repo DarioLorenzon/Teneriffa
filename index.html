@@ -1,13 +1,7 @@
 <script>
-let table;
-
-function filterOrt(value) {
-  if (table) {
-    table.column(4).search(value).draw();
-  }
-}
-
 document.addEventListener("DOMContentLoaded", function () {
+
+  console.log("Seite geladen");
 
   Papa.parse("golfplan.csv", {
     download: true,
@@ -15,32 +9,50 @@ document.addEventListener("DOMContentLoaded", function () {
     skipEmptyLines: true,
     complete: function(results) {
 
+      console.log("CSV geladen", results);
+
       const rows = results.data;
+
+      if (!rows || rows.length === 0) {
+        document.body.innerHTML = "<h2>CSV ist leer oder nicht gefunden</h2>";
+        return;
+      }
+
       const headers = rows[0];
       const data = rows.slice(1);
 
-      const maxCols = headers.length;
+      const table = document.getElementById("golfTable");
 
-      // Zeilen normieren
-      const normalizedData = data.map(row => {
-        while (row.length < maxCols) row.push("");
-        return row;
+      // Header bauen
+      let thead = "<tr>";
+      headers.forEach(h => thead += `<th>${h}</th>`);
+      thead += "</tr>";
+      table.querySelector("thead").innerHTML = thead;
+
+      // Body bauen (OHNE DataTables!)
+      let tbody = "";
+      data.forEach(row => {
+        tbody += "<tr>";
+        headers.forEach((_, i) => {
+          tbody += `<td>${row[i] || ""}</td>`;
+        });
+        tbody += "</tr>";
       });
 
-      // Header EINMAL sauber setzen
-      const theadRow =
-        '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
-      document.querySelector('#golfTable thead').innerHTML = theadRow;
+      table.querySelector("tbody").innerHTML = tbody;
 
-      // DataTable starten
-      table = $('#golfTable').DataTable({
-        data: normalizedData,
-        pageLength: 50,
-        autoWidth: false,
-        deferRender: true,
-        columns: headers.map(() => ({ defaultContent: "" }))
+      console.log("Tabelle roh gebaut");
+
+      // ERST JETZT DataTables aktivieren
+      $('#golfTable').DataTable({
+        pageLength: 50
       });
 
+      console.log("DataTable gestartet");
+    },
+    error: function(err) {
+      document.body.innerHTML = "<h2>Fehler beim Laden der CSV</h2>";
+      console.error(err);
     }
   });
 
