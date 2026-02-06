@@ -1,143 +1,45 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<title>Golf Planung</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-
-<style>
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-  margin: 0;
-  background: #f2f4f7;
-  color: #2c3e50;
-}
-
-header {
-  background: #1f2937;
-  color: white;
-  padding: 18px 24px;
-  font-size: 22px;
-  font-weight: 600;
-}
-
-.container {
-  padding: 24px;
-}
-
-.buttons {
-  margin-bottom: 16px;
-}
-
-button {
-  padding: 8px 14px;
-  margin-right: 8px;
-  border: none;
-  background: #2563eb;
-  color: white;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-button:hover {
-  background: #1e40af;
-}
-
-.dataTables_wrapper {
-  background: white;
-  padding: 16px;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
-
-table.dataTable thead th {
-  background: #f9fafb;
-  font-weight: 600;
-}
-
-table.dataTable tbody tr:hover {
-  background: #f3f4f6;
-}
-</style>
-</head>
-
-<body>
-
-<header>Golf Planung</header>
-
-<div class="container">
-
-<div class="buttons">
-  <button onclick="filterOrt('')">Alle</button>
-  <button onclick="filterOrt('AM')">AM</button>
-  <button onclick="filterOrt('DS')">DS</button>
-  <button onclick="filterOrt('AD')">AD</button>
-</div>
-
-<table id="golfTable" class="display" style="width:100%">
-  <thead></thead>
-  <tbody></tbody>
-</table>
-
-</div>
-
 <script>
 let table;
 
 function filterOrt(value) {
-  table.column(4).search(value).draw();
+  table.column(4).search(value).draw(); // Spalte E
 }
 
 Papa.parse("golfplan.csv", {
   download: true,
-  header: true,
   delimiter: ";",
   skipEmptyLines: true,
-  transformHeader: h => h.trim(),   // entfernt unsichtbare Leerzeichen
   complete: function(results) {
 
-    let data = results.data;
+    const rows = results.data;
 
-    // Alle Spalten sammeln, die irgendwo vorkommen
-    const allHeaders = new Set();
-    data.forEach(row => {
-      Object.keys(row).forEach(k => allHeaders.add(k.trim()));
+    // Erste Zeile = Header
+    const headers = rows[0];
+
+    // Rest = Daten
+    const data = rows.slice(1);
+
+    // Maximale Spaltenanzahl ermitteln
+    const maxCols = headers.length;
+
+    // Jede Zeile auf gleiche Länge bringen
+    const normalizedData = data.map(row => {
+      while (row.length < maxCols) {
+        row.push("");
+      }
+      return row;
     });
 
-    const headers = Array.from(allHeaders);
-
-    // Jede Zeile auf alle Spalten auffüllen (fehlende = leer)
-    data = data.map(row => {
-      const newRow = {};
-      headers.forEach(h => {
-        newRow[h] = row[h] ? row[h].trim() : "";
-      });
-      return newRow;
-    });
-
+    // Header bauen
     $('#golfTable thead').append(
       '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>'
     );
 
     table = $('#golfTable').DataTable({
-      data: data,
-      columns: headers.map(h => ({ data: h, title: h })),
+      data: normalizedData,
+      columns: headers.map(() => ({ title: "" })),
       pageLength: 50
     });
   }
 });
 </script>
-
-
-
-</body>
-</html>
-
-
-
