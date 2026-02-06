@@ -2,53 +2,47 @@
 let table;
 
 function filterOrt(value) {
-  table.column(4).search(value).draw(); // Spalte E
+  if (table) {
+    table.column(4).search(value).draw();
+  }
 }
 
-Papa.parse("golfplan.csv", {
-  download: true,
-  delimiter: ";",
-  skipEmptyLines: true,
-  complete: function(results) {
+document.addEventListener("DOMContentLoaded", function () {
 
-    const rows = results.data;
+  Papa.parse("golfplan.csv", {
+    download: true,
+    delimiter: ";",
+    skipEmptyLines: true,
+    complete: function(results) {
 
-    // Erste Zeile = Header
-    const headers = rows[0];
+      const rows = results.data;
+      const headers = rows[0];
+      const data = rows.slice(1);
 
-    // Rest = Daten
-    const data = rows.slice(1);
+      const maxCols = headers.length;
 
-    // Maximale Spaltenanzahl ermitteln
-    const maxCols = headers.length;
+      // Zeilen normieren
+      const normalizedData = data.map(row => {
+        while (row.length < maxCols) row.push("");
+        return row;
+      });
 
-    // Jede Zeile auf gleiche Länge bringen
-    const normalizedData = data.map(row => {
-      while (row.length < maxCols) {
-        row.push("");
-      }
-      return row;
-    });
+      // Header EINMAL sauber setzen
+      const theadRow =
+        '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+      document.querySelector('#golfTable thead').innerHTML = theadRow;
 
-    // Header bauen
-    $('#golfTable thead').append(
-      '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>'
-    );
+      // DataTable starten
+      table = $('#golfTable').DataTable({
+        data: normalizedData,
+        pageLength: 50,
+        autoWidth: false,
+        deferRender: true,
+        columns: headers.map(() => ({ defaultContent: "" }))
+      });
 
-// Header fix einsetzen
-const theadRow = '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
-$('#golfTable thead').html(theadRow);
+    }
+  });
 
-// DataTable ERST NACHDEM der Header fix ist
-table = $('#golfTable').DataTable({
-  data: normalizedData,
-  autoWidth: false,
-  deferRender: true,
-  pageLength: 50,
-  columns: headers.map(() => ({ defaultContent: "" }))
-});
-
-  }
 });
 </script>
-
