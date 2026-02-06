@@ -91,17 +91,35 @@ table.dataTable tbody tr:hover {
 let table;
 
 function filterOrt(value) {
-  table.column(4).search(value).draw(); // Spalte E = Ort
+  table.column(4).search(value).draw();
 }
 
 Papa.parse("golfplan.csv", {
   download: true,
   header: true,
   delimiter: ";",
+  skipEmptyLines: true,
+  transformHeader: h => h.trim(),   // entfernt unsichtbare Leerzeichen
   complete: function(results) {
 
-    const data = results.data;
-    const headers = Object.keys(data[0]);
+    let data = results.data;
+
+    // Alle Spalten sammeln, die irgendwo vorkommen
+    const allHeaders = new Set();
+    data.forEach(row => {
+      Object.keys(row).forEach(k => allHeaders.add(k.trim()));
+    });
+
+    const headers = Array.from(allHeaders);
+
+    // Jede Zeile auf alle Spalten auffüllen (fehlende = leer)
+    data = data.map(row => {
+      const newRow = {};
+      headers.forEach(h => {
+        newRow[h] = row[h] ? row[h].trim() : "";
+      });
+      return newRow;
+    });
 
     $('#golfTable thead').append(
       '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>'
@@ -120,5 +138,6 @@ Papa.parse("golfplan.csv", {
 
 </body>
 </html>
+
 
 
