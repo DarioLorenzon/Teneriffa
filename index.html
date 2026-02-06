@@ -7,6 +7,7 @@
 
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
 <style>
@@ -87,34 +88,37 @@ table.dataTable tbody tr:hover {
 </div>
 
 <script>
+let table;
+
 function filterOrt(value) {
   table.column(4).search(value).draw(); // Spalte E = Ort
 }
 
-let table;
+Papa.parse("golfplan.csv", {
+  download: true,
+  header: true,
+  delimiter: ";",
+  complete: function(results) {
 
-fetch("golfplan.csv")
-  .then(response => response.text())
-  .then(data => {
-
-    // Schweizer CSV = Semikolon
-    const rows = data.trim().split("\n").map(r => r.split(";"));
-    const headers = rows[0];
+    const data = results.data;
+    const headers = Object.keys(data[0]);
 
     $('#golfTable thead').append(
       '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>'
     );
 
     table = $('#golfTable').DataTable({
-      data: rows.slice(1),
-      columns: headers.map(h => ({ title: h })),
+      data: data,
+      columns: headers.map(h => ({ data: h, title: h })),
       pageLength: 50
     });
-
-  });
+  }
+});
 </script>
+
 
 
 </body>
 </html>
+
 
