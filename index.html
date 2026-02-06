@@ -17,6 +17,57 @@ body {
   color: #2c3e50;
 }
 
+header {
+  background: #1f2937;
+  color: white;
+  padding: 18px 24px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.container {
+  padding: 24px;
+}
+
+.buttons {
+  margin-bottom: 16px;
+}
+
+button {
+  padding: 8px 14px;
+  margin-right: 8px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+button:hover {
+  background: #1e40af;
+}
+
+.dataTables_wrapper {
+  background: white;
+  padding: 16px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+table.dataTable thead th {
+  background: #f9fafb;
+  font-weight: 600;
+}
+
+table.dataTable tbody tr:hover {
+  background: #f3f4f6;
+}
+</style>
+</head>
+
+<body>
+
 <header>Golf Planung</header>
 
 <div class="container">
@@ -28,20 +79,16 @@ body {
   <button onclick="filterOrt('AD')">AD</button>
 </div>
 
-
-<br>
-
 <table id="golfTable" class="display" style="width:100%">
-<thead></thead>
-<tbody></tbody>
+  <thead></thead>
+  <tbody></tbody>
 </table>
+
 </div>
-
-
 
 <script>
 function filterOrt(value) {
-  table.column(4).search(value).draw(); // Spalte E = Ort
+  table.column(4).search(value).draw();
 }
 
 let table;
@@ -57,15 +104,12 @@ fetch("golfplan.csv")
     );
 
     table = $('#golfTable').DataTable({
-  data: rows.slice(1),
-  columns: headers.map(h => ({ title: h })),
-  pageLength: 50,
-  fixedHeader: true
-});
-
+      data: rows.slice(1),
+      columns: headers.map(h => ({ title: h })),
+      pageLength: 50
+    });
   });
 </script>
 
 </body>
 </html>
-
