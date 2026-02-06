@@ -10,28 +10,24 @@
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
 <style>
-body { font-family: Arial, sans-serif; margin:20px; }
-button {
-  padding:8px 14px;
-  margin-right:8px;
-  border:none;
-  background:#3498db;
-  color:white;
-  border-radius:4px;
-  cursor:pointer;
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  margin: 0;
+  background: #f2f4f7;
+  color: #2c3e50;
 }
-</style>
-</head>
-<body>
 
-<h2>Golf Planung</h2>
+<header>Golf Planung</header>
 
-<div>
+<div class="container">
+
+<div class="buttons">
   <button onclick="filterOrt('')">Alle</button>
   <button onclick="filterOrt('AM')">AM</button>
   <button onclick="filterOrt('DS')">DS</button>
   <button onclick="filterOrt('AD')">AD</button>
 </div>
+
 
 <br>
 
@@ -39,6 +35,9 @@ button {
 <thead></thead>
 <tbody></tbody>
 </table>
+</div>
+
+
 
 <script>
 function filterOrt(value) {
@@ -58,11 +57,15 @@ fetch("golfplan.csv")
     );
 
     table = $('#golfTable').DataTable({
-      data: rows.slice(1),
-      columns: headers.map(h => ({ title: h }))
-    });
+  data: rows.slice(1),
+  columns: headers.map(h => ({ title: h })),
+  pageLength: 50,
+  fixedHeader: true
+});
+
   });
 </script>
 
 </body>
 </html>
+
