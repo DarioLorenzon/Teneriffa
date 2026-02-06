@@ -41,19 +41,16 @@ button {
 </table>
 
 <script>
-// HIER DEIN ONEDRIVE LINK EINSETZEN (siehe unten)
-const csvUrl = "https://onedrive.live.com/download.aspx?resid=8062010BBF1BB3B7!AQKgxHdb6WbQ7Zs_beRbJwuAQ0aXlRKlfeehlv4o4lWunI&format=csv";
-
 function filterOrt(value) {
-  table.column(4).search(value).draw(); // Spalte E = Index 4
+  table.column(4).search(value).draw(); // Spalte E = Ort
 }
 
 let table;
 
-fetch(csvUrl)
+fetch("golfplan.csv")
   .then(response => response.text())
   .then(data => {
-    const rows = data.split("\n").map(r => r.split(","));
+    const rows = data.trim().split("\n").map(r => r.split(","));
     const headers = rows[0];
 
     $('#golfTable thead').append(
@@ -69,5 +66,3 @@ fetch(csvUrl)
 
 </body>
 </html>
-
-
