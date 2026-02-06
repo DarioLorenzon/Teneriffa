@@ -35,11 +35,20 @@ Papa.parse("golfplan.csv", {
       '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>'
     );
 
-    table = $('#golfTable').DataTable({
-      data: normalizedData,
-      columns: headers.map(() => ({ title: "" })),
-      pageLength: 50
-    });
+// Header fix einsetzen
+const theadRow = '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+$('#golfTable thead').html(theadRow);
+
+// DataTable ERST NACHDEM der Header fix ist
+table = $('#golfTable').DataTable({
+  data: normalizedData,
+  autoWidth: false,
+  deferRender: true,
+  pageLength: 50,
+  columns: headers.map(() => ({ defaultContent: "" }))
+});
+
   }
 });
 </script>
+
