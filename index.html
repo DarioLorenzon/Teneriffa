@@ -88,7 +88,7 @@ table.dataTable tbody tr:hover {
 
 <script>
 function filterOrt(value) {
-  table.column(4).search(value).draw();
+  table.column(4).search(value).draw(); // Spalte E = Ort
 }
 
 let table;
@@ -96,7 +96,9 @@ let table;
 fetch("golfplan.csv")
   .then(response => response.text())
   .then(data => {
-    const rows = data.trim().split("\n").map(r => r.split(","));
+
+    // Schweizer CSV = Semikolon
+    const rows = data.trim().split("\n").map(r => r.split(";"));
     const headers = rows[0];
 
     $('#golfTable thead').append(
@@ -108,8 +110,11 @@ fetch("golfplan.csv")
       columns: headers.map(h => ({ title: h })),
       pageLength: 50
     });
+
   });
 </script>
 
+
 </body>
 </html>
+
