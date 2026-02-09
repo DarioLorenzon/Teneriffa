@@ -17,13 +17,9 @@ body {
   background: #f2f4f7;
 }
 
-h1 {
-  margin-bottom: 10px;
-}
+h1 { margin-bottom: 10px; }
 
-.buttons {
-  margin-bottom: 15px;
-}
+.buttons { margin-bottom: 15px; }
 
 button {
   padding: 8px 12px;
@@ -35,13 +31,12 @@ button {
   border-radius: 4px;
 }
 
-button:hover {
-  background: #1a252f;
+select {
+  padding: 8px;
+  margin-left: 10px;
 }
 
-table {
-  background: white;
-}
+table { background: white; }
 </style>
 </head>
 
@@ -50,10 +45,11 @@ table {
 <h1>Golf Planung</h1>
 
 <div class="buttons">
-  <button onclick="filterOrt('')">Alle</button>
+  <button onclick="filterOrt('')">Alle Orte</button>
   <button onclick="filterOrt('AM')">AM</button>
   <button onclick="filterOrt('DS')">DS</button>
   <button onclick="filterOrt('AD')">AD</button>
+  <span id="personFilter"></span>
 </div>
 
 <table id="golfTable" class="display" style="width:100%">
@@ -63,103 +59,18 @@ table {
 
 <script>
 let table;
+let currentPersonCol = null;
 
-// Spalten-Definition (0 = erste Spalte)
 const COL_DATE = 0;
 const COL_ORT  = 4;
 
-// Welche Spalten sichtbar sein sollen (Indexe anpassen falls nötig)
+// Spalten, die sichtbar sein sollen (anpassen möglich)
 const VISIBLE_COLUMNS = [0,1,2,3,4,5,6,7,8];
 
-// Datum formatieren
 function formatDate(dateStr) {
   if (!dateStr) return "";
   const d = new Date(dateStr);
   if (isNaN(d)) return dateStr;
   return ("0" + d.getDate()).slice(-2) + "." +
          ("0" + (d.getMonth()+1)).slice(-2) + "." +
-         d.getFullYear();
-}
-
-function filterOrt(value) {
-  table.column(COL_ORT).search(value).draw();
-}
-
-function filterPerson(value) {
-  if (!value) {
-    table.search("").draw();
-  } else {
-    table.search(value).draw();
-  }
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-
-  Papa.parse("golfplan.csv", {
-    download: true,
-    delimiter: ";",
-    skipEmptyLines: true,
-    complete: function(results) {
-
-      const rows = results.data;
-      const headers = rows[0];
-      const data = rows.slice(1);
-
-      const maxCols = headers.length;
-
-      const normalizedData = data.map(row => {
-        while (row.length < maxCols) row.push("");
-
-        // Datum schön formatieren
-        row[COL_DATE] = formatDate(row[COL_DATE]);
-
-        return row;
-      });
-
-      // Header
-      const theadRow =
-        '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
-      document.querySelector('#golfTable thead').innerHTML = theadRow;
-
-      // Person Filter Dropdown bauen (aus Headern)
-      let personFilter = '<select onchange="filterPerson(this.value)"><option value="">Alle Personen</option>';
-      headers.forEach((h,i) => {
-        if (i > COL_ORT) {  // Personen sind nach "Ort"
-          personFilter += `<option value="${h}">${h}</option>`;
-        }
-      });
-      personFilter += '</select>';
-      document.querySelector('.buttons').innerHTML += personFilter;
-
-      // DataTable
-      table = $('#golfTable').DataTable({
-        data: normalizedData,
-        pageLength: 50,
-        autoWidth: false,
-        deferRender: true,
-        order: [[COL_DATE, "asc"]],
-        columns: headers.map((h, i) => ({
-          title: h,
-          visible: VISIBLE_COLUMNS.includes(i),
-          width: i === COL_DATE ? "110px" : "90px",
-          createdCell: function(td, cellData, rowData) {
-            // farbig wenn jemand eingetragen ist
-            if (i > COL_ORT && cellData.trim() !== "") {
-              td.style.backgroundColor = "#d4edda";
-              td.style.fontWeight = "bold";
-              td.style.textAlign = "center";
-            }
-          }
-        }))
-      });
-
-    }
-  });
-
-});
-</script>
-
-
-</body>
-</html>
-
+         d.getFullYea
