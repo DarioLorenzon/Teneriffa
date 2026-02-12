@@ -5,15 +5,20 @@
 <title>Golf Planung</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<!-- DataTables -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.3.0/css/fixedColumns.dataTables.min.css">
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
 <script src="https://cdn.datatables.net/fixedcolumns/4.3.0/js/dataTables.fixedColumns.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <style>
@@ -51,13 +56,8 @@ table.dataTable tbody tr.weekend {
   background-color: #eeeeee !important;
 }
 
-div.dataTables_wrapper {
-  overflow-x: auto;
-}
-
 @media (max-width: 768px) {
   body { margin: 8px; }
-  table { font-size: 12px; }
 }
 </style>
 </head>
@@ -84,20 +84,15 @@ let table;
 let currentPersonCol = null;
 
 const COL_DATE = 0;
-const COL_ORT  = 4;   // Falls Ort in anderer Spalte ist → hier anpassen
+const COL_ORT  = 1; // anpassen falls nötig
 
-function formatDate(dateStr) {
-  if (!dateStr) return "";
-  const d = new Date(dateStr);
-  if (isNaN(d)) return dateStr;
-  return ("0" + d.getDate()).slice(-2) + "." +
-         ("0" + (d.getMonth()+1)).slice(-2) + "." +
-         d.getFullYear();
+function parseDate(dateStr) {
+  const parts = dateStr.split(".");
+  return new Date(parts[2], parts[1]-1, parts[0]);
 }
 
 function isWeekend(dateStr) {
-  const d = new Date(dateStr);
-  if (isNaN(d)) return false;
+  const d = parseDate(dateStr);
   const day = d.getDay();
   return day === 0 || day === 6;
 }
@@ -124,7 +119,6 @@ document.addEventListener("DOMContentLoaded", function () {
       const data = rows.slice(1);
 
       const maxCols = headers.length;
-
       const normalizedData = data.map(row => {
         while (row.length < maxCols) row.push("");
         return row;
@@ -135,7 +129,7 @@ document.addEventListener("DOMContentLoaded", function () {
         '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
       document.querySelector('#golfTable thead').innerHTML = theadRow;
 
-      // Personen Dropdown erzeugen
+      // Personen Dropdown
       let personDropdown = '<select onchange="filterPerson(this.value)">';
       personDropdown += '<option value="">Alle Personen</option>';
 
@@ -148,20 +142,19 @@ document.addEventListener("DOMContentLoaded", function () {
       personDropdown += '</select>';
       document.getElementById("personFilter").innerHTML = personDropdown;
 
-      // Europäische Datumssortierung registrieren
-      $.fn.dataTable.ext.type.order['date-eu-pre'] = function (d) {
-        if (!d) return 0;
-        const parts = d.split('.');
-        return new Date(parts[2], parts[1]-1, parts[0]).getTime();
-      };
-
       table = $('#golfTable').DataTable({
         data: normalizedData,
+        responsive: true,
         scrollX: true,
         pageLength: 50,
-        order: [[COL_DATE, "asc"]],
         dom: 'Bfrtip',
+        order: [[COL_DATE, "asc"]],
         buttons: [
+          {
+            extend: 'excelHtml5',
+            text: 'Excel Export',
+            title: 'Golf_Planung'
+          },
           {
             extend: 'colvis',
             text: 'Spalten anzeigen'
@@ -170,19 +163,18 @@ document.addEventListener("DOMContentLoaded", function () {
         fixedColumns: {
           leftColumns: 2
         },
-        columns: headers.map((h,i) => ({
-          title: h,
-          type: i === COL_DATE ? "date-eu" : "string",
-          width: i === COL_DATE ? "110px" : "90px",
-          defaultContent: ""
-        })),
+        columnDefs: [
+          {
+            targets: COL_DATE,
+            render: function(data, type) {
+              if (type === 'sort') {
+                return parseDate(data).getTime();
+              }
+              return data;
+            }
+          }
+        ],
         createdRow: function(row, data) {
-
-          // Datum formatieren
-          const formatted = formatDate(data[COL_DATE]);
-          $('td', row).eq(COL_DATE).html(formatted);
-
-          // Wochenende markieren
           if (isWeekend(data[COL_DATE])) {
             $(row).addClass("weekend");
           }
