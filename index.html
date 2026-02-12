@@ -6,8 +6,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <style>
@@ -19,7 +23,7 @@ body {
 
 h1 { margin-bottom: 10px; }
 
-.buttons { margin-bottom: 15px; }
+.buttons-bar { margin-bottom: 15px; }
 
 button {
   padding: 8px 12px;
@@ -44,7 +48,7 @@ table { background: white; }
 
 <h1>Golf Planung</h1>
 
-<div class="buttons">
+<div class="buttons-bar">
   <button onclick="filterOrt('')">Alle Orte</button>
   <button onclick="filterOrt('AM')">AM</button>
   <button onclick="filterOrt('DS')">DS</button>
@@ -63,9 +67,6 @@ let currentPersonCol = null;
 
 const COL_DATE = 0;
 const COL_ORT  = 4;
-
-// Spalten, die sichtbar sein sollen (anpassen möglich)
-const VISIBLE_COLUMNS = [0,1,2,3,4,5,6,7,8];
 
 function formatDate(dateStr) {
   if (!dateStr) return "";
@@ -110,7 +111,7 @@ document.addEventListener("DOMContentLoaded", function () {
         '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
       document.querySelector('#golfTable thead').innerHTML = theadRow;
 
-      // Personen-Dropdown bauen
+      // Personen-Dropdown
       let personDropdown = '<select onchange="filterPerson(this.value)">';
       personDropdown += '<option value="">Alle Personen</option>';
       headers.forEach((h,i) => {
@@ -128,9 +129,15 @@ document.addEventListener("DOMContentLoaded", function () {
         autoWidth: false,
         deferRender: true,
         order: [[COL_DATE, "asc"]],
+        dom: 'Bfrtip',   // Buttons aktivieren
+        buttons: [
+          {
+            extend: 'colvis',
+            text: 'Spalten anzeigen'
+          }
+        ],
         columns: headers.map((h,i) => ({
           title: h,
-          visible: VISIBLE_COLUMNS.includes(i),
           width: i === COL_DATE ? "110px" : "90px",
           defaultContent: ""
         }))
