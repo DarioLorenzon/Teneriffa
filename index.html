@@ -2,142 +2,131 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Golf Planung</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Golf Anmeldung Übersicht</title>
 
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.3.0/css/fixedColumns.dataTables.min.css">
-
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
-<script src="https://cdn.datatables.net/fixedcolumns/4.3.0/js/dataTables.fixedColumns.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-  margin: 15px;
-  background: #f2f4f7;
+    font-family: Arial, sans-serif;
+    margin: 10px;
 }
 
-h1 { margin-bottom: 12px; }
-
-.toolbar {
-  margin-bottom: 15px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-button, select {
-  padding: 7px 10px;
-  border-radius: 4px;
-  border: none;
-  font-size: 14px;
+h2 {
+    text-align: center;
 }
 
 button {
-  background: #2c3e50;
-  color: white;
-  cursor: pointer;
+    padding: 10px;
+    margin: 5px 0;
+    font-size: 16px;
 }
 
-button:hover { background: #1a252f; }
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 900px;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 6px;
+    text-align: center;
+    font-size: 14px;
+}
+
+th {
+    background-color: #f2f2f2;
+}
 
 @media (max-width: 768px) {
-  body { margin: 8px; }
+    th, td {
+        font-size: 12px;
+        padding: 4px;
+    }
 }
 </style>
 </head>
-
 <body>
 
-<h1>Golf Planung</h1>
+<h2>Golf Anmeldung Übersicht</h2>
 
-<div class="toolbar">
-  <button onclick="filterOrt('')">Alle Orte</button>
-  <button onclick="filterOrt('AM')">AM</button>
-  <button onclick="filterOrt('DS')">DS</button>
-  <button onclick="filterOrt('AD')">AD</button>
-  <span id="personFilter"></span>
+<input type="file" id="fileInput" accept=".csv">
+<br>
+<button onclick="exportTable()">Als XLS exportieren</button>
+
+<div class="table-container">
+    <table id="dataTable"></table>
 </div>
 
-<table id="golfTable" class="display nowrap" style="width:100%">
-  <thead></thead>
-  <tbody></tbody>
-</table>
-
 <script>
-let table;
-let currentPersonCol = null;
+let tableData = [];
 
-const COL_DATE = 0;
-const COL_ORT  = 1; // ggf. anpassen
+document.getElementById('fileInput').addEventListener('change', handleFile);
+
+function handleFile(e) {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function(event) {
+        const text = event.target.result;
+        parseCSV(text);
+        renderTable();
+    };
+
+    reader.readAsText(file, 'UTF-8');
+}
+
+function parseCSV(text) {
+    const rows = text.trim().split('\n');
+    tableData = rows.map(row => row.split(';'));
+
+    const header = tableData[0];
+    const body = tableData.slice(1);
+
+    body.sort((a, b) => {
+        const dateA = parseDate(a[0]);
+        const dateB = parseDate(b[0]);
+        return dateA - dateB;
+    });
+
+    tableData = [header, ...body];
+}
 
 function parseDate(dateStr) {
-  const parts = dateStr.split(".");
-  return new Date(parts[2], parts[1]-1, parts[0]);
+    const parts = dateStr.split('.');
+    return new Date(parts[2], parts[1] - 1, parts[0]);
 }
 
-function filterOrt(value) {
-  table.column(COL_ORT).search(value).draw();
+function renderTable() {
+    const table = document.getElementById('dataTable');
+    table.innerHTML = '';
+
+    tableData.forEach((row, rowIndex) => {
+        const tr = document.createElement('tr');
+
+        row.forEach((cell, colIndex) => {
+            const element = document.createElement(rowIndex === 0 ? 'th' : 'td');
+            element.textContent = cell;
+            tr.appendChild(element);
+        });
+
+        table.appendChild(tr);
+    });
 }
 
-function filterPerson(colIndex) {
-  currentPersonCol = colIndex === "" ? null : parseInt(colIndex);
-  table.draw();
+function exportTable() {
+    const ws = XLSX.utils.aoa_to_sheet(tableData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Golf");
+    XLSX.writeFile(wb, "Golf_Anmeldungen.xlsx");
 }
+</script>
 
-document.addEventListener("DOMContentLoaded", function () {
-
-  Papa.parse("golfplan.csv", {
-    download: true,
-    delimiter: ";",
-    skipEmptyLines: true,
-    complete: function(results) {
-
-      const rows = results.data;
-      const headers = rows[0];
-      const data = rows.slice(1);
-
-      const maxCols = headers.length;
-
-      const normalizedData = data.map(row => {
-        while (row.length < maxCols) row.push("");
-        return row;
-      });
-
-      // Header erzeugen
-      const theadRow =
-        '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
-      document.querySelector('#golfTable thead').innerHTML = theadRow;
-
-      // Personen Dropdown
-      let personDropdown = '<select onchange="filterPerson(this.value)">';
-      personDropdown += '<option value="">Alle Personen</option>';
-
-      headers.forEach((h,i) => {
-        if (i > COL_ORT) {
-          personDropdown += `<option value="${i}">${h}</option>`;
-        }
-      });
-
-      personDropdown += '</select>';
-      document.getElementById("personFilter").innerHTML = personDropdown;
-
-      table = $('#golfTable').DataTable({
-        data: normalizedData,
-        responsive: true,
-        scrollX: true,
-        pageLength: 50,
-        dom: 'Btip',   // 🔥 KEIN Search Feld mehr
-        order: [[COL_DATE, "asc"]],
-        buttons: [
-          {
+</body>
+</html>
