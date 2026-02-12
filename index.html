@@ -73,4 +73,81 @@ function formatDate(dateStr) {
   if (isNaN(d)) return dateStr;
   return ("0" + d.getDate()).slice(-2) + "." +
          ("0" + (d.getMonth()+1)).slice(-2) + "." +
-         d.getFullYea
+         d.getFullYear();
+}
+
+function filterOrt(value) {
+  table.column(COL_ORT).search(value).draw();
+}
+
+function filterPerson(colIndex) {
+  currentPersonCol = colIndex === "" ? null : parseInt(colIndex);
+  table.draw();
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  Papa.parse("golfplan.csv", {
+    download: true,
+    delimiter: ";",
+    skipEmptyLines: true,
+    complete: function(results) {
+
+      const rows = results.data;
+      const headers = rows[0];
+      const data = rows.slice(1);
+
+      const maxCols = headers.length;
+
+      const normalizedData = data.map(row => {
+        while (row.length < maxCols) row.push("");
+        row[COL_DATE] = formatDate(row[COL_DATE]);
+        return row;
+      });
+
+      // Header einsetzen
+      const theadRow =
+        '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+      document.querySelector('#golfTable thead').innerHTML = theadRow;
+
+      // Personen-Dropdown bauen
+      let personDropdown = '<select onchange="filterPerson(this.value)">';
+      personDropdown += '<option value="">Alle Personen</option>';
+      headers.forEach((h,i) => {
+        if (i > COL_ORT) {
+          personDropdown += `<option value="${i}">${h}</option>`;
+        }
+      });
+      personDropdown += '</select>';
+      document.getElementById("personFilter").innerHTML = personDropdown;
+
+      // DataTable starten
+      table = $('#golfTable').DataTable({
+        data: normalizedData,
+        pageLength: 50,
+        autoWidth: false,
+        deferRender: true,
+        order: [[COL_DATE, "asc"]],
+        columns: headers.map((h,i) => ({
+          title: h,
+          visible: VISIBLE_COLUMNS.includes(i),
+          width: i === COL_DATE ? "110px" : "90px",
+          defaultContent: ""
+        }))
+      });
+
+      // Custom Personenfilter
+      $.fn.dataTable.ext.search.push(function(settings, data) {
+        if (currentPersonCol === null) return true;
+        const cell = data[currentPersonCol];
+        return cell && cell.trim() !== "";
+      });
+
+    }
+  });
+
+});
+</script>
+
+</body>
+</html>
