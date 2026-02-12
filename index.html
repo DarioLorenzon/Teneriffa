@@ -11,15 +11,12 @@ body {
   margin: 20px;
 }
 
-h1 {
-  margin-bottom: 10px;
-}
-
 .controls {
   margin-bottom: 15px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
 }
 
 table {
@@ -32,50 +29,34 @@ th, td {
   border: 1px solid #ccc;
   padding: 6px;
   text-align: center;
-  font-size: 14px;
 }
 
 th {
-  background-color: #f2f2f2;
+  background: #f2f2f2;
 }
 
-/* Wochenende grau */
 .weekend {
   background-color: #eeeeee;
 }
 
-/* Fixierte Spalten */
-th.sticky, td.sticky {
+/* Sticky columns */
+.sticky1 {
   position: sticky;
   left: 0;
   background: white;
-  z-index: 2;
+  z-index: 3;
+  min-width: 120px;
 }
 
-th.sticky2, td.sticky2 {
+.sticky2 {
   position: sticky;
   left: 120px;
   background: white;
-  z-index: 2;
-}
-
-th.sticky {
   z-index: 3;
-}
-
-.table-wrapper {
-  overflow-x: auto;
-}
-
-@media (max-width: 768px) {
-  th, td {
-    padding: 4px;
-    font-size: 12px;
-  }
+  min-width: 80px;
 }
 </style>
 </head>
-
 <body>
 
 <h1>Golf Anmeldung</h1>
@@ -92,7 +73,7 @@ th.sticky {
 </div>
 
 <div class="table-wrapper">
-  <table id="tabelle">
+  <table>
     <thead>
       <tr id="headerRow"></tr>
     </thead>
@@ -101,80 +82,87 @@ th.sticky {
 </div>
 
 <script>
-const personen = ["Lorenzon Dario", "Gruber Beatrice", "Stanek Sandra"];
+document.addEventListener("DOMContentLoaded", function() {
 
-const daten = [
-  { datum: "01.12.2025", ort: "AM" },
-  { datum: "02.12.2025", ort: "" },
-  { datum: "03.12.2025", ort: "AM" },
-  { datum: "04.12.2025", ort: "DS" },
-  { datum: "05.12.2025", ort: "AM" },
-  { datum: "06.12.2025", ort: "" },
-  { datum: "07.12.2025", ort: "AD" },
-  { datum: "08.12.2025", ort: "DS" }
-];
+  console.log("Script gestartet");
 
-function istWochenende(datumString) {
-  const parts = datumString.split(".");
-  const date = new Date(parts[2], parts[1] - 1, parts[0]);
-  const tag = date.getDay();
-  return tag === 0 || tag === 6;
-}
+  const personen = ["Lorenzon Dario", "Gruber Beatrice", "Stanek Sandra"];
 
-function renderTabelle() {
+  const daten = [
+    { datum: "01.12.2025", ort: "AM" },
+    { datum: "02.12.2025", ort: "" },
+    { datum: "03.12.2025", ort: "AM" },
+    { datum: "04.12.2025", ort: "DS" },
+    { datum: "05.12.2025", ort: "AM" },
+    { datum: "06.12.2025", ort: "" },
+    { datum: "07.12.2025", ort: "AD" },
+    { datum: "08.12.2025", ort: "DS" }
+  ];
 
-  const ortFilter = document.getElementById("ortFilter").value;
+  function istWochenende(datumString) {
+    const parts = datumString.split(".");
+    const date = new Date(parts[2], parts[1] - 1, parts[0]);
+    const tag = date.getDay();
+    return tag === 0 || tag === 6;
+  }
 
-  const headerRow = document.getElementById("headerRow");
-  const tableBody = document.getElementById("tableBody");
+  function renderTabelle() {
 
-  headerRow.innerHTML = "";
-  tableBody.innerHTML = "";
+    console.log("Render gestartet");
 
-  // Header bauen
-  let headerHTML = `
-    <th class="sticky" style="min-width:120px;">Datum</th>
-    <th class="sticky2" style="min-width:80px;">Ort</th>
-  `;
+    const ortFilter = document.getElementById("ortFilter").value;
+    const headerRow = document.getElementById("headerRow");
+    const tableBody = document.getElementById("tableBody");
 
-  personen.forEach(p => {
-    headerHTML += `<th>${p}</th>`;
-  });
+    headerRow.innerHTML = "";
+    tableBody.innerHTML = "";
 
-  headerRow.innerHTML = headerHTML;
-
-  // Zeilen bauen
-  daten.forEach((eintrag, index) => {
-
-    if (ortFilter !== "alle" && eintrag.ort !== ortFilter) return;
-
-    const tr = document.createElement("tr");
-
-    if (istWochenende(eintrag.datum)) {
-      tr.classList.add("weekend");
-    }
-
-    let rowHTML = `
-      <td class="sticky">${eintrag.datum}</td>
-      <td class="sticky2">${eintrag.ort}</td>
+    // Header
+    let headerHTML = `
+      <th class="sticky1">Datum</th>
+      <th class="sticky2">Ort</th>
     `;
 
-    personen.forEach((p, pIndex) => {
-      rowHTML += `
-        <td>
-          <input type="checkbox" id="cb-${index}-${pIndex}">
-        </td>
-      `;
+    personen.forEach(p => {
+      headerHTML += `<th>${p}</th>`;
     });
 
-    tr.innerHTML = rowHTML;
-    tableBody.appendChild(tr);
-  });
-}
+    headerRow.innerHTML = headerHTML;
 
-document.getElementById("ortFilter").addEventListener("change", renderTabelle);
+    // Rows
+    daten.forEach((eintrag, index) => {
 
-renderTabelle();
+      if (ortFilter !== "alle" && eintrag.ort !== ortFilter) return;
+
+      const tr = document.createElement("tr");
+
+      if (istWochenende(eintrag.datum)) {
+        tr.classList.add("weekend");
+      }
+
+      let rowHTML = `
+        <td class="sticky1">${eintrag.datum}</td>
+        <td class="sticky2">${eintrag.ort}</td>
+      `;
+
+      personen.forEach((p, pIndex) => {
+        rowHTML += `
+          <td>
+            <input type="checkbox">
+          </td>
+        `;
+      });
+
+      tr.innerHTML = rowHTML;
+      tableBody.appendChild(tr);
+    });
+  }
+
+  document.getElementById("ortFilter")
+    .addEventListener("change", renderTabelle);
+
+  renderTabelle();
+});
 </script>
 
 </body>
