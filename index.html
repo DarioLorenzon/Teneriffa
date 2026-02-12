@@ -23,7 +23,7 @@ body {
   background: #f2f4f7;
 }
 
-h1 { margin-bottom: 10px; }
+h1 { margin-bottom: 12px; }
 
 .toolbar {
   margin-bottom: 15px;
@@ -33,9 +33,10 @@ h1 { margin-bottom: 10px; }
 }
 
 button, select {
-  padding: 8px 10px;
+  padding: 7px 10px;
   border-radius: 4px;
   border: none;
+  font-size: 14px;
 }
 
 button {
@@ -83,7 +84,7 @@ let table;
 let currentPersonCol = null;
 
 const COL_DATE = 0;
-const COL_ORT  = 4;
+const COL_ORT  = 4;   // Falls Ort in anderer Spalte ist → hier anpassen
 
 function formatDate(dateStr) {
   if (!dateStr) return "";
@@ -96,6 +97,7 @@ function formatDate(dateStr) {
 
 function isWeekend(dateStr) {
   const d = new Date(dateStr);
+  if (isNaN(d)) return false;
   const day = d.getDay();
   return day === 0 || day === 6;
 }
@@ -128,21 +130,30 @@ document.addEventListener("DOMContentLoaded", function () {
         return row;
       });
 
-      // Header
+      // Header erzeugen
       const theadRow =
         '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
       document.querySelector('#golfTable thead').innerHTML = theadRow;
 
-      // Personen Dropdown
+      // Personen Dropdown erzeugen
       let personDropdown = '<select onchange="filterPerson(this.value)">';
       personDropdown += '<option value="">Alle Personen</option>';
+
       headers.forEach((h,i) => {
         if (i > COL_ORT) {
           personDropdown += `<option value="${i}">${h}</option>`;
         }
       });
+
       personDropdown += '</select>';
       document.getElementById("personFilter").innerHTML = personDropdown;
+
+      // Europäische Datumssortierung registrieren
+      $.fn.dataTable.ext.type.order['date-eu-pre'] = function (d) {
+        if (!d) return 0;
+        const parts = d.split('.');
+        return new Date(parts[2], parts[1]-1, parts[0]).getTime();
+      };
 
       table = $('#golfTable').DataTable({
         data: normalizedData,
@@ -157,23 +168,24 @@ document.addEventListener("DOMContentLoaded", function () {
           }
         ],
         fixedColumns: {
-          leftColumns: 2   // Datum + zweite Spalte fixiert
+          leftColumns: 2
         },
         columns: headers.map((h,i) => ({
           title: h,
+          type: i === COL_DATE ? "date-eu" : "string",
           width: i === COL_DATE ? "110px" : "90px",
           defaultContent: ""
         })),
         createdRow: function(row, data) {
 
-          const originalDate = rows[data[0] ? rows.findIndex(r => r[0] === data[0]) : 0][0];
+          // Datum formatieren
+          const formatted = formatDate(data[COL_DATE]);
+          $('td', row).eq(COL_DATE).html(formatted);
 
-          if (isWeekend(originalDate)) {
+          // Wochenende markieren
+          if (isWeekend(data[COL_DATE])) {
             $(row).addClass("weekend");
           }
-
-          // Datum schön anzeigen
-          data[COL_DATE] = formatDate(data[COL_DATE]);
         }
       });
 
