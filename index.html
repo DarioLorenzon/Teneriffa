@@ -93,9 +93,9 @@ const daten = [
 ];
 
 function istWochenende(datumString) {
-  const parts = datumString.split(".");
-  const date = new Date(parts[2], parts[1] - 1, parts[0]);
-  const tag = date.getDay();
+  const teile = datumString.split(".");
+  const datum = new Date(teile[2], teile[1] - 1, teile[0]);
+  const tag = datum.getDay();
   return tag === 0 || tag === 6;
 }
 
@@ -115,13 +115,24 @@ function renderTabelle() {
       tr.classList.add("weekend");
     }
 
-    tr.innerHTML = `
-      <td class="sticky1">${eintrag.datum}</td>
-      <td class="sticky2">${eintrag.ort}</td>
-      <td><input type="checkbox"></td>
-      <td><input type="checkbox"></td>
-      <td><input type="checkbox"></td>
-    `;
+    const tdDatum = document.createElement("td");
+    tdDatum.className = "sticky1";
+    tdDatum.textContent = eintrag.datum;
+
+    const tdOrt = document.createElement("td");
+    tdOrt.className = "sticky2";
+    tdOrt.textContent = eintrag.ort;
+
+    tr.appendChild(tdDatum);
+    tr.appendChild(tdOrt);
+
+    for (let i = 0; i < 3; i++) {
+      const td = document.createElement("td");
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      td.appendChild(checkbox);
+      tr.appendChild(td);
+    }
 
     tbody.appendChild(tr);
   });
@@ -132,6 +143,7 @@ document.getElementById("ortFilter")
 
 renderTabelle();
 </script>
-
+  
 </body>
 </html>
+
