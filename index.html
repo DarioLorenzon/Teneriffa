@@ -71,6 +71,8 @@ document.getElementById('fileInput').addEventListener('change', handleFile);
 
 function handleFile(e) {
     const file = e.target.files[0];
+    if (!file) return;
+
     const reader = new FileReader();
 
     reader.onload = function(event) {
@@ -84,33 +86,52 @@ function handleFile(e) {
 
 function parseCSV(text) {
     const rows = text.trim().split(/\r?\n/);
-    tableData = rows.map(row => row.split(';').map(cell => cell.trim()));
+
+    tableData = rows.map(row =>
+        row.split(';').map(cell => cell.trim())
+    );
+
+    if (tableData.length <= 1) return;
 
     const header = tableData[0];
     const body = tableData.slice(1);
 
     body.sort((a, b) => {
-        const dateA = parseDate(a[0]);
-        const dateB = parseDate(b[0]);
+        const dateA = convertToDate(a[0]);
+        const dateB = convertToDate(b[0]);
         return dateA - dateB;
     });
 
     tableData = [header, ...body];
 }
 
-function parseDate(dateStr) {
+function convertToDate(dateStr) {
+    // Erwartet Format dd.mm.yyyy
+    if (!dateStr) return new Date(0);
+
     const parts = dateStr.split('.');
-    return new Date(parts[2], parts[1] - 1, parts[0]);
+    if (parts.length !== 3) return new Date(0);
+
+    return new Date(
+        parseInt(parts[2]),
+        parseInt(parts[1]) - 1,
+        parseInt(parts[0])
+    );
 }
 
 function renderTable() {
     const table = document.getElementById('dataTable');
     table.innerHTML = '';
 
+    if (tableData.length === 0) {
+        table.innerHTML = '<tr><td>Keine Daten geladen</td></tr>';
+        return;
+    }
+
     tableData.forEach((row, rowIndex) => {
         const tr = document.createElement('tr');
 
-        row.forEach((cell, colIndex) => {
+        row.forEach(cell => {
             const element = document.createElement(rowIndex === 0 ? 'th' : 'td');
             element.textContent = cell;
             tr.appendChild(element);
@@ -121,6 +142,11 @@ function renderTable() {
 }
 
 function exportTable() {
+    if (tableData.length === 0) {
+        alert("Keine Daten zum Exportieren geladen.");
+        return;
+    }
+
     const ws = XLSX.utils.aoa_to_sheet(tableData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Golf");
@@ -128,6 +154,8 @@ function exportTable() {
 }
 </script>
 
+
 </body>
 </html>
+
 
