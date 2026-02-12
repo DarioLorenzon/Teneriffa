@@ -5,7 +5,6 @@
 <title>Golf Planung</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- DataTables -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
@@ -52,10 +51,6 @@ button {
 
 button:hover { background: #1a252f; }
 
-table.dataTable tbody tr.weekend {
-  background-color: #eeeeee !important;
-}
-
 @media (max-width: 768px) {
   body { margin: 8px; }
 }
@@ -84,17 +79,11 @@ let table;
 let currentPersonCol = null;
 
 const COL_DATE = 0;
-const COL_ORT  = 1; // anpassen falls nötig
+const COL_ORT  = 1; // ggf. anpassen
 
 function parseDate(dateStr) {
   const parts = dateStr.split(".");
   return new Date(parts[2], parts[1]-1, parts[0]);
-}
-
-function isWeekend(dateStr) {
-  const d = parseDate(dateStr);
-  const day = d.getDay();
-  return day === 0 || day === 6;
 }
 
 function filterOrt(value) {
@@ -119,6 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const data = rows.slice(1);
 
       const maxCols = headers.length;
+
       const normalizedData = data.map(row => {
         while (row.length < maxCols) row.push("");
         return row;
@@ -147,52 +137,7 @@ document.addEventListener("DOMContentLoaded", function () {
         responsive: true,
         scrollX: true,
         pageLength: 50,
-        dom: 'Bfrtip',
+        dom: 'Btip',   // 🔥 KEIN Search Feld mehr
         order: [[COL_DATE, "asc"]],
         buttons: [
           {
-            extend: 'excelHtml5',
-            text: 'Excel Export',
-            title: 'Golf_Planung'
-          },
-          {
-            extend: 'colvis',
-            text: 'Spalten anzeigen'
-          }
-        ],
-        fixedColumns: {
-          leftColumns: 2
-        },
-        columnDefs: [
-          {
-            targets: COL_DATE,
-            render: function(data, type) {
-              if (type === 'sort') {
-                return parseDate(data).getTime();
-              }
-              return data;
-            }
-          }
-        ],
-        createdRow: function(row, data) {
-          if (isWeekend(data[COL_DATE])) {
-            $(row).addClass("weekend");
-          }
-        }
-      });
-
-      // Personenfilter
-      $.fn.dataTable.ext.search.push(function(settings, data) {
-        if (currentPersonCol === null) return true;
-        const cell = data[currentPersonCol];
-        return cell && cell.trim() !== "";
-      });
-
-    }
-  });
-
-});
-</script>
-
-</body>
-</html>
