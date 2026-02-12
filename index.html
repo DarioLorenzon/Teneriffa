@@ -1,14 +1,136 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-  <title>Test</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Golf Anmeldung</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 700px;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 6px;
+  text-align: center;
+}
+
+th {
+  background: #f2f2f2;
+}
+
+.weekend {
+  background-color: #eeeeee;
+}
+
+/* Sticky columns */
+.sticky1 {
+  position: sticky;
+  left: 0;
+  background: white;
+  z-index: 2;
+}
+
+.sticky2 {
+  position: sticky;
+  left: 120px;
+  background: white;
+  z-index: 2;
+}
+</style>
 </head>
+
 <body>
 
-<h1>Test</h1>
+<h1>Golf Anmeldung</h1>
+
+<label>Ort:
+<select id="ortFilter">
+  <option value="alle">Alle</option>
+  <option value="AM">AM</option>
+  <option value="DS">DS</option>
+  <option value="AD">AD</option>
+</select>
+</label>
+
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th class="sticky1" style="min-width:120px;">Datum</th>
+        <th class="sticky2" style="min-width:80px;">Ort</th>
+        <th>Dario</th>
+        <th>Beatrice</th>
+        <th>Sandra</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
 
 <script>
-alert("Script läuft!");
+const daten = [
+  { datum: "01.12.2025", ort: "AM" },
+  { datum: "02.12.2025", ort: "" },
+  { datum: "03.12.2025", ort: "AM" },
+  { datum: "04.12.2025", ort: "DS" },
+  { datum: "05.12.2025", ort: "AM" },
+  { datum: "06.12.2025", ort: "" },
+  { datum: "07.12.2025", ort: "AD" },
+  { datum: "08.12.2025", ort: "DS" }
+];
+
+function istWochenende(datumString) {
+  const parts = datumString.split(".");
+  const date = new Date(parts[2], parts[1] - 1, parts[0]);
+  const tag = date.getDay();
+  return tag === 0 || tag === 6;
+}
+
+function renderTabelle() {
+  const tbody = document.getElementById("tableBody");
+  const ortFilter = document.getElementById("ortFilter").value;
+
+  tbody.innerHTML = "";
+
+  daten.forEach(eintrag => {
+
+    if (ortFilter !== "alle" && eintrag.ort !== ortFilter) return;
+
+    const tr = document.createElement("tr");
+
+    if (istWochenende(eintrag.datum)) {
+      tr.classList.add("weekend");
+    }
+
+    tr.innerHTML = `
+      <td class="sticky1">${eintrag.datum}</td>
+      <td class="sticky2">${eintrag.ort}</td>
+      <td><input type="checkbox"></td>
+      <td><input type="checkbox"></td>
+      <td><input type="checkbox"></td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById("ortFilter")
+  .addEventListener("change", renderTabelle);
+
+renderTabelle();
 </script>
 
 </body>
