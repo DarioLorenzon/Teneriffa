@@ -166,16 +166,16 @@ document.addEventListener("DOMContentLoaded", function () {
         })),
         createdRow: function(row, data) {
 
-          const originalDate = rows[data[0] ? rows.findIndex(r => r[0] === data[0]) : 0][0];
+  // Datum formatieren
+  const formatted = formatDate(data[COL_DATE]);
+  $('td', row).eq(COL_DATE).html(formatted);
 
-          if (isWeekend(originalDate)) {
-            $(row).addClass("weekend");
-          }
-
-          // Datum schön anzeigen
-          data[COL_DATE] = formatDate(data[COL_DATE]);
-        }
-      });
+  // Wochenende prüfen
+  if (isWeekend(data[COL_DATE])) {
+    $(row).addClass("weekend");
+  }
+}
+;
 
       // Personenfilter
       $.fn.dataTable.ext.search.push(function(settings, data) {
@@ -192,3 +192,4 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
