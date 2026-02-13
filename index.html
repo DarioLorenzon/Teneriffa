@@ -16,7 +16,6 @@
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
 <script src="https://cdn.datatables.net/fixedcolumns/4.3.0/js/dataTables.fixedColumns.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -29,7 +28,11 @@ body {
   background: #f2f4f7;
 }
 
-h1 { margin-bottom: 12px; }
+h1 { margin-bottom: 10px; }
+
+input[type="file"] {
+  margin-bottom: 15px;
+}
 
 .toolbar {
   margin-bottom: 15px;
@@ -67,6 +70,8 @@ table.dataTable td {
 
 <h1>Golf Planung</h1>
 
+<input type="file" id="csvFile" accept=".csv">
+
 <div class="toolbar">
   <button onclick="filterOrt('')">Alle Orte</button>
   <button onclick="filterOrt('AM')">AM</button>
@@ -85,7 +90,118 @@ let table;
 let currentPersonCol = null;
 
 const COL_DATE = 0;
-const COL_ORT  = 4; // WICHTIG: Ort ist laut deiner CSV an Position 4
+const COL_ORT  = 4; // Ort laut deiner CSV
 
 function parseDate(dateStr) {
-  if (!dateStr) return
+  if (!dateStr) return new Date(0);
+  const parts = dateStr.split(".");
+  if (parts.length !== 3) return new Date(0);
+
+  return new Date(
+    parseInt(parts[2],10),
+    parseInt(parts[1],10)-1,
+    parseInt(parts[0],10)
+  );
+}
+
+function filterOrt(value) {
+  if (!table) return;
+  table.column(COL_ORT).search(value).draw();
+}
+
+function filterPerson(colIndex) {
+  if (!table) return;
+  currentPersonCol = colIndex === "" ? null : parseInt(colIndex);
+  table.draw();
+}
+
+document.getElementById("csvFile").addEventListener("change", function(e) {
+
+  const file = e.target.files[0];
+  if (!file) return;
+
+  Papa.parse(file, {
+    delimiter: ";",
+    skipEmptyLines: true,
+    complete: function(results) {
+
+      const rows = results.data;
+      if (!rows || rows.length === 0) return;
+
+      const headers = rows[0];
+      const data = rows.slice(1);
+
+      const maxCols = headers.length;
+      const normalizedData = data.map(row => {
+        while (row.length < maxCols) row.push("");
+        return row;
+      });
+
+      // Header erzeugen
+      const theadRow =
+        '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+      document.querySelector('#golfTable thead').innerHTML = theadRow;
+
+      // Personen Dropdown
+      let personDropdown = '<select onchange="filterPerson(this.value)">';
+      personDropdown += '<option value="">Alle Personen</option>';
+
+      headers.forEach((h,i) => {
+        if (i > COL_ORT) {
+          personDropdown += `<option value="${i}">${h}</option>`;
+        }
+      });
+
+      personDropdown += '</select>';
+      document.getElementById("personFilter").innerHTML = personDropdown;
+
+      if (table) {
+        table.destroy();
+      }
+
+      table = $('#golfTable').DataTable({
+        data: normalizedData,
+        responsive: true,
+        scrollX: true,
+        scrollCollapse: true,
+        pageLength: 50,
+        searching: false,
+        order: [[COL_DATE, "asc"]],
+        dom: 'Bfrtip',
+        buttons: [
+          {
+            extend: 'excelHtml5',
+            text: 'Excel Export',
+            title: 'Golf_Planung'
+          }
+        ],
+        fixedColumns: {
+          leftColumns: 2
+        },
+        columnDefs: [
+          {
+            targets: COL_DATE,
+            render: function(data, type) {
+              if (type === 'sort') {
+                return parseDate(data).getTime();
+              }
+              return data;
+            }
+          }
+        ]
+      });
+
+      $.fn.dataTable.ext.search.push(function(settings, data) {
+        if (currentPersonCol === null) return true;
+        const cell = data[currentPersonCol];
+        return cell && cell.trim() !== "";
+      });
+
+    }
+  });
+
+});
+</script>
+
+</body>
+</html>
