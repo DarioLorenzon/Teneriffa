@@ -5,12 +5,13 @@
 <title>Golf Planung</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- DataTables -->
+<!-- DataTables CSS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.3.0/css/fixedColumns.dataTables.min.css">
 
+<!-- jQuery + DataTables -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
@@ -52,8 +53,8 @@ button {
 
 button:hover { background: #1a252f; }
 
-table.dataTable tbody tr.weekend {
-  background-color: #eeeeee !important;
+table.dataTable td {
+  white-space: nowrap;
 }
 
 @media (max-width: 768px) {
@@ -84,115 +85,7 @@ let table;
 let currentPersonCol = null;
 
 const COL_DATE = 0;
-const COL_ORT  = 1; // anpassen falls nötig
+const COL_ORT  = 4; // WICHTIG: Ort ist laut deiner CSV an Position 4
 
 function parseDate(dateStr) {
-  const parts = dateStr.split(".");
-  return new Date(parts[2], parts[1]-1, parts[0]);
-}
-
-function isWeekend(dateStr) {
-  const d = parseDate(dateStr);
-  const day = d.getDay();
-  return day === 0 || day === 6;
-}
-
-function filterOrt(value) {
-  table.column(COL_ORT).search(value).draw();
-}
-
-function filterPerson(colIndex) {
-  currentPersonCol = colIndex === "" ? null : parseInt(colIndex);
-  table.draw();
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-
-  Papa.parse("golfplan.csv", {
-    download: true,
-    delimiter: ";",
-    skipEmptyLines: true,
-    complete: function(results) {
-
-      const rows = results.data;
-      const headers = rows[0];
-      const data = rows.slice(1);
-
-      const maxCols = headers.length;
-      const normalizedData = data.map(row => {
-        while (row.length < maxCols) row.push("");
-        return row;
-      });
-
-      // Header erzeugen
-      const theadRow =
-        '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
-      document.querySelector('#golfTable thead').innerHTML = theadRow;
-
-      // Personen Dropdown
-      let personDropdown = '<select onchange="filterPerson(this.value)">';
-      personDropdown += '<option value="">Alle Personen</option>';
-
-      headers.forEach((h,i) => {
-        if (i > COL_ORT) {
-          personDropdown += `<option value="${i}">${h}</option>`;
-        }
-      });
-
-      personDropdown += '</select>';
-      document.getElementById("personFilter").innerHTML = personDropdown;
-
-      table = $('#golfTable').DataTable({
-        data: normalizedData,
-        responsive: true,
-        scrollX: true,
-        pageLength: 50,
-        dom: 'Bfrtip',
-        order: [[COL_DATE, "asc"]],
-        buttons: [
-          {
-            extend: 'excelHtml5',
-            text: 'Excel Export',
-            title: 'Golf_Planung'
-          },
-          {
-            extend: 'colvis',
-            text: 'Spalten anzeigen'
-          }
-        ],
-        fixedColumns: {
-          leftColumns: 2
-        },
-        columnDefs: [
-          {
-            targets: COL_DATE,
-            render: function(data, type) {
-              if (type === 'sort') {
-                return parseDate(data).getTime();
-              }
-              return data;
-            }
-          }
-        ],
-        createdRow: function(row, data) {
-          if (isWeekend(data[COL_DATE])) {
-            $(row).addClass("weekend");
-          }
-        }
-      });
-
-      // Personenfilter
-      $.fn.dataTable.ext.search.push(function(settings, data) {
-        if (currentPersonCol === null) return true;
-        const cell = data[currentPersonCol];
-        return cell && cell.trim() !== "";
-      });
-
-    }
-  });
-
-});
-</script>
-
-</body>
-</html>
+  if (!dateStr) return
