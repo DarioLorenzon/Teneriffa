@@ -23,7 +23,13 @@ body {
   background: #f2f4f7;
 }
 
-h1 { margin-bottom: 10px; }
+h1 { margin-bottom: 5px; }
+
+#lastUpdate {
+  margin-bottom: 15px;
+  font-size: 13px;
+  color: #555;
+}
 
 .toolbar {
   margin-bottom: 15px;
@@ -64,6 +70,7 @@ div.dataTables_wrapper {
 <body>
 
 <h1>Golf Planung</h1>
+<div id="lastUpdate">Letzte Aktualisierung: –</div>
 
 <div class="toolbar">
   <button onclick="filterOrt('')">Alle Orte</button>
@@ -117,84 +124,8 @@ function filterPerson(colIndex) {
 
 document.addEventListener("DOMContentLoaded", function () {
 
-  Papa.parse("golfplan.csv", {
+  // Cache vermeiden (erzwingt immer neueste CSV)
+  const csvUrl = "golfplan.csv?v=" + new Date().getTime();
+
+  Papa.parse(csvUrl, {
     download: true,
-    delimiter: ";",
-    skipEmptyLines: true,
-    complete: function(results) {
-
-      const rows = results.data;
-      const headers = rows[0];
-      const data = rows.slice(1);
-
-      const maxCols = headers.length;
-
-      const normalizedData = data.map(row => {
-        while (row.length < maxCols) row.push("");
-        return row;
-      });
-
-      // Header erzeugen
-      const theadRow =
-        '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
-      document.querySelector('#golfTable thead').innerHTML = theadRow;
-
-      // Personen Dropdown
-      let personDropdown = '<select onchange="filterPerson(this.value)">';
-      personDropdown += '<option value="">Alle Personen</option>';
-      headers.forEach((h,i) => {
-        if (i > COL_ORT) {
-          personDropdown += `<option value="${i}">${h}</option>`;
-        }
-      });
-      personDropdown += '</select>';
-      document.getElementById("personFilter").innerHTML = personDropdown;
-
-      table = $('#golfTable').DataTable({
-        data: normalizedData,
-        scrollX: true,
-        pageLength: 50,
-        order: [[COL_DATE, "asc"]],
-        dom: 'Bfrtip',
-        buttons: [
-          {
-            extend: 'colvis',
-            text: 'Spalten anzeigen'
-          }
-        ],
-        fixedColumns: {
-          leftColumns: 2
-        },
-        columnDefs: [
-          {
-            targets: COL_DATE,
-            render: function(data, type) {
-              if (type === 'sort') {
-                return parseDate(data).getTime();
-              }
-              return formatDate(data);
-            }
-          }
-        ],
-        createdRow: function(row, data) {
-          if (isWeekend(data[COL_DATE])) {
-            $(row).addClass("weekend");
-          }
-        }
-      });
-
-      // Personenfilter
-      $.fn.dataTable.ext.search.push(function(settings, data) {
-        if (currentPersonCol === null) return true;
-        const cell = data[currentPersonCol];
-        return cell && cell.trim() !== "";
-      });
-
-    }
-  });
-
-});
-</script>
-
-</body>
-</html>
