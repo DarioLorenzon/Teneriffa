@@ -85,9 +85,15 @@ let currentPersonCol = null;
 const COL_DATE = 0;
 const COL_ORT  = 4;
 
+function parseDate(dateStr) {
+  if (!dateStr) return new Date(0);
+  const parts = dateStr.split(".");
+  if (parts.length !== 3) return new Date(0);
+  return new Date(parts[2], parts[1]-1, parts[0]);
+}
+
 function formatDate(dateStr) {
-  if (!dateStr) return "";
-  const d = new Date(dateStr);
+  const d = parseDate(dateStr);
   if (isNaN(d)) return dateStr;
   return ("0" + d.getDate()).slice(-2) + "." +
          ("0" + (d.getMonth()+1)).slice(-2) + "." +
@@ -95,7 +101,7 @@ function formatDate(dateStr) {
 }
 
 function isWeekend(dateStr) {
-  const d = new Date(dateStr);
+  const d = parseDate(dateStr);
   const day = d.getDay();
   return day === 0 || day === 6;
 }
@@ -128,7 +134,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return row;
       });
 
-      // Header
+      // Header erzeugen
       const theadRow =
         '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
       document.querySelector('#golfTable thead').innerHTML = theadRow;
@@ -157,23 +163,23 @@ document.addEventListener("DOMContentLoaded", function () {
           }
         ],
         fixedColumns: {
-          leftColumns: 2   // Datum + zweite Spalte fixiert
+          leftColumns: 2
         },
-        columns: headers.map((h,i) => ({
-          title: h,
-          width: i === COL_DATE ? "110px" : "90px",
-          defaultContent: ""
-        })),
+        columnDefs: [
+          {
+            targets: COL_DATE,
+            render: function(data, type) {
+              if (type === 'sort') {
+                return parseDate(data).getTime();
+              }
+              return formatDate(data);
+            }
+          }
+        ],
         createdRow: function(row, data) {
-
-          const originalDate = rows[data[0] ? rows.findIndex(r => r[0] === data[0]) : 0][0];
-
-          if (isWeekend(originalDate)) {
+          if (isWeekend(data[COL_DATE])) {
             $(row).addClass("weekend");
           }
-
-          // Datum schön anzeigen
-          data[COL_DATE] = formatDate(data[COL_DATE]);
         }
       });
 
