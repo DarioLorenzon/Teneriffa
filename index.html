@@ -122,6 +122,7 @@ document.addEventListener("DOMContentLoaded", function () {
       document.querySelector('#golfTable thead').innerHTML = theadRow;
 
       table = $('#golfTable').DataTable({
+        dom: 'lrtip',   // entfernt das globale Suchfeld
         searching: true,
         data: data,
         scrollX: true,
@@ -158,6 +159,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
