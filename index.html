@@ -1,3 +1,5 @@
+// Gute Version 16.02.2026
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -6,10 +8,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.3.0/css/fixedColumns.dataTables.min.css">
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
 <script src="https://cdn.datatables.net/fixedcolumns/4.3.0/js/dataTables.fixedColumns.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
@@ -63,9 +68,9 @@ div.dataTables_wrapper {
 
 <div class="toolbar">
   <button onclick="filterOrt('')">Alle Orte</button>
-  <button onclick="filterOrt('^AM$')">AM</button>
-  <button onclick="filterOrt('^DS$')">DS</button>
-  <button onclick="filterOrt('^AD$')">AD</button>
+  <button onclick="filterOrt('AM')">AM</button>
+  <button onclick="filterOrt('DS')">DS</button>
+  <button onclick="filterOrt('AD')">AD</button>
 </div>
 
 <table id="golfTable" class="display nowrap" style="width:100%">
@@ -91,11 +96,7 @@ function isWeekend(dateStr) {
 }
 
 function filterOrt(value) {
-  if (value === "") {
-    table.column(COL_ORT).search("").draw();
-  } else {
-    table.column(COL_ORT).search(value, true, false).draw();
-  }
+  table.column(COL_ORT).search(value).draw();
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -114,33 +115,18 @@ document.addEventListener("DOMContentLoaded", function () {
         now.toLocaleDateString("de-CH") + " " +
         now.toLocaleTimeString("de-CH");
 
-    const rows = results.data;
-    
-    // Leere Zeilen entfernen
-    const cleanedRows = rows.filter(r => r.length > 1 && r[0] !== "");
-    
-    const headers = cleanedRows[0];
-    const rawData = cleanedRows.slice(1);
-    
-    // Sicherstellen, dass jede Zeile gleich viele Spalten hat
-    const maxCols = headers.length;
-    
-    const data = rawData.map(row => {
-      while (row.length < maxCols) row.push("");
-      return row;
-    });
-
+      const rows = results.data;
+      const headers = rows[0];
+      const data = rows.slice(1);
 
       const theadRow =
         '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
       document.querySelector('#golfTable thead').innerHTML = theadRow;
 
       table = $('#golfTable').DataTable({
-        dom: 'lrtip',              // kein Suchfeld
-        searching: true,           // intern für Ortsfilter nötig
-        paging: true,
-        info: false,
-        lengthChange: false,
+        dom: 'lrtip',   // entfernt das globale Suchfeld
+        searching: true,
+        data: data,
         scrollX: true,
         pageLength: 50,
         order: [[COL_DATE, "asc"]],
@@ -164,7 +150,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Automatisches Reload alle 10 Minuten
+  // Reload alle 10 Minuten
   setInterval(function() {
     location.reload();
   }, 10 * 60 * 1000);
@@ -175,4 +161,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
+
+
 
