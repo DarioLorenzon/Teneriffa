@@ -111,8 +111,9 @@ table.dataTable tbody td {
 <script>
 
 const COL_DATE = 0;
-const COL_NAME = 1;   // Falls Namensspalte anders ist → anpassen
-const COL_ORT  = 4;
+const COL_ORT  = 1;
+const COL_NAME = 6;   // Falls Namensspalte anders ist → anpassen
+
 
 let table;
 
@@ -152,25 +153,26 @@ document.addEventListener("DOMContentLoaded", function () {
       const data = rows.slice(1);
 
       const theadRow =
-        '<tr>' + headers.map((h, index) => {
-      
-          // Personennamen (ab Spalte 6 anpassen falls nötig)
-          if (index >= 6) {
-            const parts = h.split(" ");
-            if (parts.length >= 2) {
-              return `<th>${parts[0]}<br>${parts[1]}</th>`;
-            }
+      '<tr>' + headers.map((h, index) => {
+    
+        // Tee Time kompakt
+        if (h.startsWith("Tee Time")) {
+          const number = h.replace("Tee Time", "").trim();
+          return `<th>Tee<br>Time ${number}</th>`;
+        }
+    
+        // Namen kompakt (ab Index 6)
+        if (index >= COL_NAME_START) {
+          const parts = h.split(" ");
+          if (parts.length >= 2) {
+            return `<th>${parts[0]}<br>${parts[1]}</th>`;
           }
-      
-          // Tee Time kompakt darstellen
-          if (h.startsWith("Tee Time")) {
-            const number = h.replace("Tee Time", "").trim();
-            return `<th>Tee<br>Time${number}</th>`;
-          }
-      
-          return `<th>${h}</th>`;
-      
-        }).join('') + '</tr>';
+        }
+    
+        return `<th>${h}</th>`;
+    
+      }).join('') + '</tr>';
+
 
 
 
@@ -196,7 +198,7 @@ document.addEventListener("DOMContentLoaded", function () {
         pageLength: 50,
         order: [[COL_DATE, "asc"]],
 
-        fixedColumns: { leftColumns: 2 },
+        fixedColumns: { leftColumns: 3 },
         fixedHeader: true,
 
         columnDefs: [
@@ -239,6 +241,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
