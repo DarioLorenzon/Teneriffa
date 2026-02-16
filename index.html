@@ -139,8 +139,21 @@ document.addEventListener("DOMContentLoaded", function () {
       const headers = rows[0];
       const data = rows.slice(1);
 
-      const theadRow =
-        '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+    const theadRow =
+      '<tr>' + headers.map((h, index) => {
+
+    // Nur Personenspalten umbauen (ab Spalte 6)
+    if (index >= 6) {
+      const parts = h.split(" ");
+      if (parts.length >= 2) {
+        return `<th>${parts[0]}<br>${parts[1]}</th>`;
+      }
+    }
+
+    return `<th>${h}</th>`;
+
+  }).join('') + '</tr>';
+
 
       document.querySelector('#golfTable thead').innerHTML = theadRow;
 
@@ -207,3 +220,4 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
