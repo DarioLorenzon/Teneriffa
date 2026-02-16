@@ -8,12 +8,14 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.3.0/css/fixedColumns.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css">
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
 <script src="https://cdn.datatables.net/fixedcolumns/4.3.0/js/dataTables.fixedColumns.min.js"></script>
+<script src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <style>
@@ -57,6 +59,20 @@ table.dataTable tbody tr.weekend td:first-child {
 div.dataTables_wrapper {
   overflow-x: auto;
 }
+
+/* Kompaktere Zeilen */
+table.dataTable tbody td {
+  padding: 4px 6px;
+  line-height: 1.1;
+  font-size: 12px;
+}
+
+/* Namensspalte kompakter */
+#golfTable td:nth-child(2) {
+  white-space: nowrap;
+  font-size: 12px;
+  line-height: 1.1;
+}
 </style>
 </head>
 
@@ -83,7 +99,9 @@ div.dataTables_wrapper {
 <script>
 
 const COL_DATE = 0;
+const COL_NAME = 1;   // Falls Namensspalte anders ist → anpassen
 const COL_ORT  = 4;
+
 let table;
 
 function parseDate(dateStr) {
@@ -123,34 +141,53 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const theadRow =
         '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+
       document.querySelector('#golfTable thead').innerHTML = theadRow;
 
       table = $('#golfTable').DataTable({
-        dom: 'Blrtip',   // 
+        dom: 'Blrtip',
         searching: true,
 
         buttons: [
-            {
-              extend: 'colvis',
-              text: 'Spalten anzeigen'
-            }
-          ],
+          {
+            extend: 'colvis',
+            text: 'Spalten anzeigen'
+          }
+        ],
 
-        
         data: data,
+
         scrollX: true,
+        scrollY: "70vh",
+        scrollCollapse: true,
+
         pageLength: 50,
         order: [[COL_DATE, "asc"]],
+
         fixedColumns: { leftColumns: 2 },
-        columnDefs: [{
-          targets: COL_DATE,
-          render: function(data, type) {
-            if (type === "sort") {
-              return parseDate(data).getTime();
+        fixedHeader: true,
+
+        columnDefs: [
+          {
+            targets: COL_DATE,
+            render: function(data, type) {
+              if (type === "sort") {
+                return parseDate(data).getTime();
+              }
+              return data;
             }
-            return data;
+          },
+          {
+            targets: COL_NAME,
+            render: function(data, type) {
+              if (type === "display") {
+                return data.replace(" ", "<br>");
+              }
+              return data;
+            }
           }
-        }],
+        ],
+
         createdRow: function(row, data) {
           if (isWeekend(data[COL_DATE])) {
             $(row).addClass("weekend");
@@ -161,24 +198,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Reload alle 10 Minuten
   setInterval(function() {
     location.reload();
   }, 10 * 60 * 1000);
 
 });
-
 </script>
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
