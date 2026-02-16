@@ -114,9 +114,22 @@ document.addEventListener("DOMContentLoaded", function () {
         now.toLocaleDateString("de-CH") + " " +
         now.toLocaleTimeString("de-CH");
 
-      const rows = results.data;
-      const headers = rows[0];
-      const data = rows.slice(1);
+    const rows = results.data;
+    
+    // Leere Zeilen entfernen
+    const cleanedRows = rows.filter(r => r.length > 1 && r[0] !== "");
+    
+    const headers = cleanedRows[0];
+    const rawData = cleanedRows.slice(1);
+    
+    // Sicherstellen, dass jede Zeile gleich viele Spalten hat
+    const maxCols = headers.length;
+    
+    const data = rawData.map(row => {
+      while (row.length < maxCols) row.push("");
+      return row;
+    });
+
 
       const theadRow =
         '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
@@ -162,3 +175,4 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
