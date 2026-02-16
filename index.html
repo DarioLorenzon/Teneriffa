@@ -112,7 +112,7 @@ table.dataTable tbody td {
 
 const COL_DATE = 0;
 const COL_ORT  = 1;
-const COL_NAME = 6;   // Falls Namensspalte anders ist → anpassen
+const COL_NAME_START = 6;
 
 
 let table;
@@ -212,15 +212,25 @@ document.addEventListener("DOMContentLoaded", function () {
             }
           },
           {
-            targets: COL_NAME,
+            targets: "_all",
+            className: "dt-center"
+          },
+          {
+            targets: function(index) {
+              return index >= COL_NAME_START;
+            },
             render: function(data, type) {
-              if (type === "display") {
-                return data.replace(" ", "<br>");
+              if (type === "display" && data) {
+                const parts = data.split(" ");
+                if (parts.length >= 2) {
+                  return parts[0] + "<br>" + parts[1];
+                }
               }
               return data;
             }
           }
-        ],
+        ]
+
 
         createdRow: function(row, data) {
           if (isWeekend(data[COL_DATE])) {
@@ -241,6 +251,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
