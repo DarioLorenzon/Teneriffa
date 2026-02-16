@@ -68,9 +68,12 @@ div.dataTables_wrapper {
 
 <div class="toolbar">
   <button onclick="filterOrt('')">Alle Orte</button>
-  <button onclick="filterOrt('AM')">AM</button>
-  <button onclick="filterOrt('DS')">DS</button>
-  <button onclick="filterOrt('AD')">AD</button>
+  <button onclick="filterOrt('^AM$')">AM</button>
+  <button onclick="filterOrt('^DS$')">DS</button>
+  <button onclick="filterOrt('^AD$')">AD</button>
+  <button onclick="filterOrt('^LA$')">LA</button>
+  <button onclick="filterOrt('^BV$')">BV</button>
+  <button onclick="filterOrt('^RE$')">RE</button>
 </div>
 
 <table id="golfTable" class="display nowrap" style="width:100%">
@@ -161,6 +164,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
