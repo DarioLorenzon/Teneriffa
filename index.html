@@ -126,8 +126,17 @@ document.addEventListener("DOMContentLoaded", function () {
       document.querySelector('#golfTable thead').innerHTML = theadRow;
 
       table = $('#golfTable').DataTable({
-        dom: 'lrtip',   // entfernt das globale Suchfeld
+        dom: 'Blrtip',   // 
         searching: true,
+
+        buttons: [
+            {
+              extend: 'colvis',
+              text: 'Spalten anzeigen'
+            }
+          ],
+
+        
         data: data,
         scrollX: true,
         pageLength: 50,
@@ -163,6 +172,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
