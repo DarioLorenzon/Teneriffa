@@ -185,7 +185,7 @@ document.addEventListener("DOMContentLoaded", function () {
     {
       targets: headers
         .map((h, i) =>
-          (h.includes("Tee Time 2") || h.includes("Tee Time 3")) ? i : null
+          (h.includes("T2") || h.includes("T3")) ? i : null
         )
         .filter(i => i !== null),
       visible: false
@@ -243,4 +243,5 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
