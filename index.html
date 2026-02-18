@@ -73,6 +73,29 @@ table.dataTable tbody td {
 table.dataTable tbody tr.weekend td:first-child {
   font-weight: bold;
 }
+
+/* Modern DataTables Button */
+
+a.dt-button.modern-btn {
+  background: #34495e !important;
+  color: #ffffff !important;
+  border-radius: 6px !important;
+  padding: 6px 12px !important;
+  font-size: 12px !important;
+  border: none !important;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+a.dt-button.modern-btn:hover {
+  background: #1f2d3a !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+a.dt-button.modern-btn:focus {
+  outline: none !important;
+}
 </style>
 </head>
 
@@ -159,7 +182,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         buttons: [{
           extend: 'colvis',
-          text: 'Spalten ein/ausblenden'
+          text: '☰ Spalten ein/ausblenden',
+          className: 'modern-btn'
         }],
 
         data: data,
@@ -216,25 +240,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
       });
 
-    } // ← complete korrekt geschlossen
+    }
 
-  }); // ← Papa.parse korrekt geschlossen
+  });
 
   setInterval(function() {
     location.reload();
   }, 30 * 60 * 1000);
 
-}); // ← DOMContentLoaded korrekt geschlossen
+});
 
 </script>
 
 </body>
 </html>
-
-
-
-
-
-
-
-
