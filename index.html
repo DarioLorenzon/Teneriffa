@@ -172,36 +172,20 @@ document.addEventListener("DOMContentLoaded", function () {
 /* Nur neu laden wenn CSV geändert wurde */
 /* ===================================== */
 
-let lastCsvSnapshot = null;
+document.addEventListener("DOMContentLoaded", function () {
 
-function checkForCsvUpdate() {
+  // Initial laden
+  loadCsv(true);
 
-  fetch("https://dariolorenzon.github.io/Teneriffa/golfplan.csv")
-    .then(response => response.text())
-    .then(text => {
-
-      if (lastCsvSnapshot === null) {
-        // Erstes Laden – Snapshot speichern
-        lastCsvSnapshot = text;
-        return;
-      }
-
-      if (text !== lastCsvSnapshot) {
-        console.log("CSV geändert – Seite wird neu geladen");
-        location.reload();
-      }
-
-    })
-    .catch(error => {
-      console.warn("CSV-Check fehlgeschlagen:", error);
-    });
-}
-
-// Alle 30 Minuten prüfen
-setInterval(checkForCsvUpdate, 30 * 60 * 1000);
-  
+  // Alle 30 Minuten CSV neu prüfen
+  setInterval(function() {
+    loadCsv(false);
+  }, 30 * 60 * 1000);
 
 });
 
+
+
 </script>
+
 
