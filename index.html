@@ -158,67 +158,81 @@ document.addEventListener("DOMContentLoaded", function () {
 
       table = $('#golfTable').DataTable({
 
-        dom: 'Brtip',   // ← KEIN "l" mehr → Show Entries verschwindet
+  dom: 'Brtip',
 
-        paging: false,  // ← Alle Einträge anzeigen
-        searching: true,
+  paging: false,
+  searching: true,
 
-        buttons: [{
-          extend: 'colvis',
-          text: 'Spalten anzeigen'
-        }],
+  buttons: [{
+    extend: 'colvis',
+    text: 'Spalten anzeigen'
+  }],
 
-        data: data,
+  data: data,
 
-        scrollX: true,
-        scrollY: "70vh",
-        scrollCollapse: true,
+  scrollX: true,
+  scrollY: "70vh",
+  scrollCollapse: true,
 
-        order: [[COL_DATE, "asc"]],
+  order: [[COL_DATE, "asc"]],
 
-        fixedColumns: { leftColumns: 2 },
-        fixedHeader: true,
+  fixedColumns: { leftColumns: 2 },
+  fixedHeader: true,
 
-        columnDefs: [
-          {
-            targets: COL_DATE,
-            render: function(data, type) {
-              if (type === "sort") {
-                return parseDate(data).getTime();
-              }
-              return data;
-            }
-          },
-          {
-            targets: "_all",
-            className: "dt-center"
-          },
-          {
-            targets: function(index) {
-              return index >= COL_NAME_START;
-            },
-            render: function(data, type) {
-              if (type === "display" && data) {
-                const parts = data.split(" ");
-                if (parts.length >= 2) {
-                  return parts[0] + "<br>" + parts[1];
-                }
-              }
-              return data;
-            }
-          }
-        ],
+  columnDefs: [
 
-        createdRow: function(row, data) {
-          if (isWeekend(data[COL_DATE])) {
-            $(row).addClass("weekend");
+    /* Tee Time 2 & 3 standardmässig ausblenden */
+    {
+      targets: headers
+        .map((h, i) =>
+          (h.includes("Tee Time 2") || h.includes("Tee Time 3")) ? i : null
+        )
+        .filter(i => i !== null),
+      visible: false
+    },
+
+    /* Datum korrekt sortieren */
+    {
+      targets: COL_DATE,
+      render: function(data, type) {
+        if (type === "sort") {
+          return parseDate(data).getTime();
+        }
+        return data;
+      }
+    },
+
+    /* Alles zentrieren */
+    {
+      targets: "_all",
+      className: "dt-center"
+    },
+
+    /* Namen umbrechen */
+    {
+      targets: function(index) {
+        return index >= COL_NAME_START;
+      },
+      render: function(data, type) {
+        if (type === "display" && data) {
+          const parts = data.split(" ");
+          if (parts.length >= 2) {
+            return parts[0] + "<br>" + parts[1];
           }
         }
-
-      });
-
+        return data;
+      }
     }
-  });
+  ],
+
+  createdRow: function(row, data) {
+    if (isWeekend(data[COL_DATE])) {
+      $(row).addClass("weekend");
+    }
+  }
+
+});
+
 
   setInterval(function() {
     location.reload();
@@ -229,3 +243,4 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
