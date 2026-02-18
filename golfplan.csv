@@ -1,4 +1,4 @@
-Datum;Ort;Anzahl;Tee Time 1;Tee Time 2;Tee Time 3;Lorenzon Dario;Gruber Beatrice;Renggli Beatrice;Feyerabend Christa;Stanek Sandra;Kälin Stefan;Kälin Barbara;Seper Jürgen;Renggli Brigitte;Widmer Roman;Plüss Roger;Arrigoni Barbara ;Weirich Petra;Hinder Markus;Widmer Esther
+Datum;Ort;Anzahl;T1;Tee Time 2;Tee Time 3;Lorenzon Dario;Gruber Beatrice;Renggli Beatrice;Feyerabend Christa;Stanek Sandra;Kälin Stefan;Kälin Barbara;Seper Jürgen;Renggli Brigitte;Widmer Roman;Plüss Roger;Arrigoni Barbara ;Weirich Petra;Hinder Markus;Widmer Esther
 01.12.2026;;0;00:00;;;;;;;;;;;;;;;;;
 02.12.2026;;0;00:00;;;;;;;;;;;;;;;;;
 03.12.2026;;0;00:00;;;;;;;;;;;;;;;;;
@@ -90,4 +90,5 @@ Datum;Ort;Anzahl;Tee Time 1;Tee Time 2;Tee Time 3;Lorenzon Dario;Gruber Beatrice
 26.02.2027;AM;4;00:00;;;x;x;x;;;;;;;x;;;;;
 27.02.2027;DS;0;00:00;;;;;;;;;;;;;;;;;
 28.02.2027;;0;00:00;;;;;;;;;;;;;;;;;
+
 
