@@ -181,9 +181,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   columnDefs: [
 
-  /* Tee Time 2 & 3 fix per Index ausblenden */
+  /* T2 und T3 ausblenden */
   {
-    targets: [4, 5],   // ← ggf. anpassen falls Struktur anders
+    targets: [4, 5],   // 0 Datum | 1 Ort | 2 # | 3 T1 | 4 T2 | 5 T3
     visible: false
   },
 
@@ -240,6 +240,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
