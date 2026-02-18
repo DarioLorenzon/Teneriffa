@@ -181,15 +181,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
   columnDefs: [
 
-    /* Tee Time 2 & 3 standardmässig ausblenden */
-    {
-      targets: headers
-        .map((h, i) =>
-          (h.includes("T2") || h.includes("T3")) ? i : null
-        )
-        .filter(i => i !== null),
-      visible: false
-    },
+     /* Tee Time 2 & 3 fix per Index ausblenden */
+  {
+    targets: [4, 5],   // ← ggf. anpassen falls Struktur anders
+    visible: false
+  },
 
     /* Datum korrekt sortieren */
     {
@@ -243,5 +239,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
