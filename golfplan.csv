@@ -1,4 +1,4 @@
-Datum;Ort;Anzahl;T1;T2;T3;DaLo;BeGr;BeRe;ChFe;SaSt;StKä;BaKä;JüSe;BrRe;RoWi;RoPl;BaAr ;PeWe;MaHi;EsWi
+Datum;Ort;#;T1;T2;T3;DaLo;BeGr;BeRe;ChFe;SaSt;StKä;BaKä;JüSe;BrRe;RoWi;RoPl;BaAr ;PeWe;MaHi;EsWi
 01.12.2026;;0;00:00;;;;;;;;;;;;;;;;;
 02.12.2026;;0;00:00;;;;;;;;;;;;;;;;;
 03.12.2026;;0;00:00;;;;;;;;;;;;;;;;;
@@ -90,6 +90,7 @@ Datum;Ort;Anzahl;T1;T2;T3;DaLo;BeGr;BeRe;ChFe;SaSt;StKä;BaKä;JüSe;BrRe;RoWi;R
 26.02.2027;AM;4;00:00;;;x;x;x;;;;;;;x;;;;;
 27.02.2027;DS;0;00:00;;;;;;;;;;;;;;;;;
 28.02.2027;;0;00:00;;;;;;;;;;;;;;;;;
+
 
 
 
