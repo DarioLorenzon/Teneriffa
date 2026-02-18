@@ -166,18 +166,10 @@ function loadCsv(initialLoad = false) {
 /* Initial laden */
 document.addEventListener("DOMContentLoaded", function () {
 
+  // Erstes Laden
   loadCsv(true);
 
-/* ===================================== */
-/* Nur neu laden wenn CSV geändert wurde */
-/* ===================================== */
-
-document.addEventListener("DOMContentLoaded", function () {
-
-  // Initial laden
-  loadCsv(true);
-
-  // Alle 30 Minuten CSV neu prüfen
+  // Alle 30 Minuten neu prüfen
   setInterval(function() {
     loadCsv(false);
   }, 30 * 60 * 1000);
@@ -186,6 +178,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
+
 </script>
+
 
 
