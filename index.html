@@ -137,11 +137,6 @@ document.addEventListener("DOMContentLoaded", function () {
         '<tr>' +
         headers.map((h, index) => {
 
-          if (h.startsWith("Tee Time")) {
-            const number = h.replace("Tee Time", "").trim();
-            return `<th>Tee<br>Time ${number}</th>`;
-          }
-
           if (index >= COL_NAME_START) {
             const parts = h.split(" ");
             if (parts.length >= 2) {
@@ -158,88 +153,84 @@ document.addEventListener("DOMContentLoaded", function () {
 
       table = $('#golfTable').DataTable({
 
-  dom: 'Brtip',
+        dom: 'Brtip',
+        paging: false,
+        searching: true,
 
-  paging: false,
-  searching: true,
+        buttons: [{
+          extend: 'colvis',
+          text: 'Spalten anzeigen'
+        }],
 
-  buttons: [{
-    extend: 'colvis',
-    text: 'Spalten anzeigen'
-  }],
+        data: data,
 
-  data: data,
+        scrollX: true,
+        scrollY: "70vh",
+        scrollCollapse: true,
 
-  scrollX: true,
-  scrollY: "70vh",
-  scrollCollapse: true,
+        order: [[COL_DATE, "asc"]],
+        fixedColumns: { leftColumns: 2 },
+        fixedHeader: true,
 
-  order: [[COL_DATE, "asc"]],
+        columnDefs: [
 
-  fixedColumns: { leftColumns: 2 },
-  fixedHeader: true,
+          { targets: [4, 5], visible: false },
 
-  columnDefs: [
+          {
+            targets: COL_DATE,
+            render: function(data, type) {
+              if (type === "sort") {
+                return parseDate(data).getTime();
+              }
+              return data;
+            }
+          },
 
-  /* T2 und T3 ausblenden */
-  {
-    targets: [4, 5],   // 0 Datum | 1 Ort | 2 # | 3 T1 | 4 T2 | 5 T3
-    visible: false
-  },
+          {
+            targets: "_all",
+            className: "dt-center"
+          },
 
-  /* Datum korrekt sortieren */
-  {
-    targets: COL_DATE,
-    render: function(data, type) {
-      if (type === "sort") {
-        return parseDate(data).getTime();
-      }
-      return data;
-    }
-  },
+          {
+            targets: function(index) {
+              return index >= COL_NAME_START;
+            },
+            render: function(data, type) {
+              if (type === "display" && data) {
+                const parts = data.split(" ");
+                if (parts.length >= 2) {
+                  return parts[0] + "<br>" + parts[1];
+                }
+              }
+              return data;
+            }
+          }
 
-  /* Alles zentrieren */
-  {
-    targets: "_all",
-    className: "dt-center"
-  },
+        ],
 
-  /* Namen umbrechen */
-  {
-    targets: function(index) {
-      return index >= COL_NAME_START;
-    },
-    render: function(data, type) {
-      if (type === "display" && data) {
-        const parts = data.split(" ");
-        if (parts.length >= 2) {
-          return parts[0] + "<br>" + parts[1];
+        createdRow: function(row, rowData) {
+          if (isWeekend(rowData[COL_DATE])) {
+            $(row).addClass("weekend");
+          }
         }
-      }
-      return data;
-    }
-  }
-],
 
+      });
 
-  createdRow: function(row, data) {
-    if (isWeekend(data[COL_DATE])) {
-      $(row).addClass("weekend");
-    }
-  }
+    } // ← complete korrekt geschlossen
 
-});
-
+  }); // ← Papa.parse korrekt geschlossen
 
   setInterval(function() {
     location.reload();
   }, 30 * 60 * 1000);
 
-});
+}); // ← DOMContentLoaded korrekt geschlossen
+
 </script>
 
 </body>
 </html>
+
 
 
 
