@@ -181,45 +181,46 @@ document.addEventListener("DOMContentLoaded", function () {
 
   columnDefs: [
 
-     /* Tee Time 2 & 3 fix per Index ausblenden */
+  /* Tee Time 2 & 3 fix per Index ausblenden */
   {
     targets: [4, 5],   // ← ggf. anpassen falls Struktur anders
     visible: false
   },
 
-    /* Datum korrekt sortieren */
-    {
-      targets: COL_DATE,
-      render: function(data, type) {
-        if (type === "sort") {
-          return parseDate(data).getTime();
-        }
-        return data;
+  /* Datum korrekt sortieren */
+  {
+    targets: COL_DATE,
+    render: function(data, type) {
+      if (type === "sort") {
+        return parseDate(data).getTime();
       }
-    },
-
-    /* Alles zentrieren */
-    {
-      targets: "_all",
-      className: "dt-center"
-    },
-
-    /* Namen umbrechen */
-    {
-      targets: function(index) {
-        return index >= COL_NAME_START;
-      },
-      render: function(data, type) {
-        if (type === "display" && data) {
-          const parts = data.split(" ");
-          if (parts.length >= 2) {
-            return parts[0] + "<br>" + parts[1];
-          }
-        }
-        return data;
-      }
+      return data;
     }
-  ],
+  },
+
+  /* Alles zentrieren */
+  {
+    targets: "_all",
+    className: "dt-center"
+  },
+
+  /* Namen umbrechen */
+  {
+    targets: function(index) {
+      return index >= COL_NAME_START;
+    },
+    render: function(data, type) {
+      if (type === "display" && data) {
+        const parts = data.split(" ");
+        if (parts.length >= 2) {
+          return parts[0] + "<br>" + parts[1];
+        }
+      }
+      return data;
+    }
+  }
+],
+
 
   createdRow: function(row, data) {
     if (isWeekend(data[COL_DATE])) {
@@ -239,6 +240,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
