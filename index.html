@@ -5,17 +5,13 @@
 <title>Teneriffa 2026/2027</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- ============================= -->
 <!-- DataTables CSS -->
-<!-- ============================= -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.3.0/css/fixedColumns.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css">
 
-<!-- ============================= -->
-<!-- jQuery + DataTables Scripts -->
-<!-- ============================= -->
+<!-- jQuery + DataTables -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
@@ -27,11 +23,6 @@
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <style>
-
-/* ============================= */
-/* Basis Layout */
-/* ============================= */
-
 body {
   font-family: Arial, sans-serif;
   margin: 15px;
@@ -40,18 +31,8 @@ body {
 }
 
 h1 {
-  margin-bottom: 5px;
-}
-
-#lastUpdate {
   margin-bottom: 15px;
-  font-size: 13px;
-  color: #555;
 }
-
-/* ============================= */
-/* Filter Buttons */
-/* ============================= */
 
 .toolbar {
   margin-bottom: 15px;
@@ -74,44 +55,30 @@ button:hover {
   background: #1a252f;
 }
 
-/* ============================= */
-/* DataTable Styling */
-/* ============================= */
-
-/* Horizontal Scroll sauber erlauben */
 div.dataTables_wrapper {
   overflow-x: auto;
 }
 
-/* Kompakte Zeilen */
 table.dataTable tbody td {
   padding: 4px 6px;
   line-height: 1.1;
   font-size: 12px;
 }
 
-/* Alle Zellen zentrieren */
 #golfTable tbody td,
 #golfTable thead th {
   text-align: center;
 }
 
-/* Wochenende visuell hervorheben */
 table.dataTable tbody tr.weekend td:first-child {
   font-weight: bold;
 }
-
 </style>
 </head>
 
 <body>
 
 <h1>Teneriffa 2026/2027</h1>
-<div id="lastUpdate">Letzte Aktualisierung: –</div>
-
-<!-- ============================= -->
-<!-- Ortsfilter -->
-<!-- ============================= -->
 
 <div class="toolbar">
   <button onclick="filterOrt('')">Alle Orte</button>
@@ -123,10 +90,6 @@ table.dataTable tbody tr.weekend td:first-child {
   <button onclick="filterOrt('RE')">RE</button>
 </div>
 
-<!-- ============================= -->
-<!-- Tabelle -->
-<!-- ============================= -->
-
 <table id="golfTable" class="display nowrap" style="width:100%">
   <thead></thead>
   <tbody></tbody>
@@ -134,28 +97,16 @@ table.dataTable tbody tr.weekend td:first-child {
 
 <script>
 
-/* ===================================== */
-/* Konfigurierbare Spalten-Positionen   */
-/* ===================================== */
-
-const COL_DATE = 0;          // Datum
-const COL_ORT  = 1;          // Ort
-const COL_NAME_START = 6;    // Ab dieser Spalte beginnen Namen
+const COL_DATE = 0;
+const COL_ORT  = 1;
+const COL_NAME_START = 6;
 
 let table;
-
-/* ===================================== */
-/* Datum korrekt sortierbar machen       */
-/* ===================================== */
 
 function parseDate(dateStr) {
   const parts = dateStr.split(".");
   return new Date(parts[2], parts[1] - 1, parts[0]);
 }
-
-/* ===================================== */
-/* Wochenende erkennen                   */
-/* ===================================== */
 
 function isWeekend(dateStr) {
   const d = parseDate(dateStr);
@@ -163,21 +114,12 @@ function isWeekend(dateStr) {
   return day === 0 || day === 6;
 }
 
-/* ===================================== */
-/* Ortsfilter                            */
-/* ===================================== */
-
 function filterOrt(value) {
   table.column(COL_ORT).search(value).draw();
 }
 
-/* ===================================== */
-/* Initialisierung nach DOM Load         */
-/* ===================================== */
-
 document.addEventListener("DOMContentLoaded", function () {
 
-  // Cache umgehen, damit immer aktuelle CSV geladen wird
   const csvUrl = "https://dariolorenzon.github.io/Teneriffa/golfplan.csv?v=" + Date.now();
 
   Papa.parse(csvUrl, {
@@ -187,32 +129,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
     complete: function(results) {
 
-      /* Letzte Aktualisierung anzeigen */
-      const now = new Date();
-      document.getElementById("lastUpdate").textContent =
-        "Letzte Aktualisierung: " +
-        now.toLocaleDateString("de-CH") + " " +
-        now.toLocaleTimeString("de-CH");
-
       const rows = results.data;
       const headers = rows[0];
       const data = rows.slice(1);
-
-      /* ===================================== */
-      /* Header dynamisch erzeugen             */
-      /* ===================================== */
 
       const theadRow =
         '<tr>' +
         headers.map((h, index) => {
 
-          // Tee Time kompakt umbrechen
           if (h.startsWith("Tee Time")) {
             const number = h.replace("Tee Time", "").trim();
             return `<th>Tee<br>Time ${number}</th>`;
           }
 
-          // Namen zweizeilig darstellen
           if (index >= COL_NAME_START) {
             const parts = h.split(" ");
             if (parts.length >= 2) {
@@ -227,22 +156,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
       document.querySelector('#golfTable thead').innerHTML = theadRow;
 
-      /* ===================================== */
-      /* DataTable initialisieren              */
-      /* ===================================== */
-
       table = $('#golfTable').DataTable({
 
-        dom: 'Blrtip',
+        dom: 'Brtip',   // ← KEIN "l" mehr → Show Entries verschwindet
 
+        paging: false,  // ← Alle Einträge anzeigen
         searching: true,
 
-        buttons: [
-          {
-            extend: 'colvis',
-            text: 'Spalten anzeigen'
-          }
-        ],
+        buttons: [{
+          extend: 'colvis',
+          text: 'Spalten anzeigen'
+        }],
 
         data: data,
 
@@ -250,16 +174,12 @@ document.addEventListener("DOMContentLoaded", function () {
         scrollY: "70vh",
         scrollCollapse: true,
 
-        pageLength: 50,
-
         order: [[COL_DATE, "asc"]],
 
-        fixedColumns: { leftColumns: 2 },  // Datum, Ort, Tee Time 1
+        fixedColumns: { leftColumns: 2 },
         fixedHeader: true,
 
         columnDefs: [
-
-          // Datum korrekt sortieren
           {
             targets: COL_DATE,
             render: function(data, type) {
@@ -269,14 +189,10 @@ document.addEventListener("DOMContentLoaded", function () {
               return data;
             }
           },
-
-          // Alles zentrieren
           {
             targets: "_all",
             className: "dt-center"
           },
-
-          // Namen zweizeilig darstellen
           {
             targets: function(index) {
               return index >= COL_NAME_START;
@@ -293,7 +209,6 @@ document.addEventListener("DOMContentLoaded", function () {
           }
         ],
 
-        // Wochenende fett markieren
         createdRow: function(row, data) {
           if (isWeekend(data[COL_DATE])) {
             $(row).addClass("weekend");
@@ -305,16 +220,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  /* ===================================== */
-  /* Automatischer Reload alle 10 Minuten  */
-  /* ===================================== */
-
   setInterval(function() {
     location.reload();
-  }, 30 * 60 * 1000); // Reload alle 30 Min.
+  }, 30 * 60 * 1000);
 
 });
-
 </script>
 
 </body>
