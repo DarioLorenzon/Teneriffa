@@ -5,35 +5,22 @@
 <title>Teneriffa 2026/2027</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- =========================================================
-     EXTERNE BIBLIOTHEKEN
-     ========================================================= -->
-
 <!-- DataTables Styles -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.3.0/css/fixedColumns.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css">
 
-<!-- jQuery (Basis für DataTables) -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
-<!-- DataTables Kern + Erweiterungen -->
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
 <script src="https://cdn.datatables.net/fixedcolumns/4.3.0/js/dataTables.fixedColumns.min.js"></script>
 <script src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
-
-<!-- CSV Parser (PapaParse) -->
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
-<!-- =========================================================
-     DESIGN / LAYOUT
-     ========================================================= -->
 <style>
 
-/* Grundlayout */
 body {
   font-family: Arial, sans-serif;
   margin: 15px;
@@ -45,8 +32,6 @@ h1 {
   margin-bottom: 13px;
 }
 
-/* === Topbar Layout === */
-
 .topbar {
   display: flex;
   justify-content: space-between;
@@ -56,14 +41,13 @@ h1 {
   gap: 8px;
 }
 
-/* Buttons links */
 div.dt-buttons {
   display: flex;
   gap: 8px;
 }
 
+/* === Toggle Chips === */
 
-/* Filter-Toolbar darunter sauber absetzen */
 .toolbar {
   margin-bottom: 15px;
   display: flex;
@@ -71,46 +55,46 @@ div.dt-buttons {
   gap: 8px;
 }
 
+.chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  background: #e3e8ee;
+  color: #2c3e50;
+  transition: all 0.2s ease;
+  user-select: none;
+}
 
-/* Filter-Buttons */
-button {
-  padding: 8px 10px;
-  border-radius: 4px;
-  border: none;
+.chip:hover {
+  background: #d5dde6;
+}
+
+.chip.active {
   background: #2c3e50;
   color: white;
-  cursor: pointer;
-  font-size: 13px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
 
-button:hover {
-  background: #1a252f;
-}
-
-/* DataTables Wrapper */
 div.dataTables_wrapper {
   overflow-x: auto;
 }
 
-/* Tabellenzellen kompakter */
 table.dataTable tbody td {
   padding: 4px 6px;
   line-height: 1.1;
   font-size: 12px;
 }
 
-/* Zentrierte Inhalte */
 #golfTable tbody td,
 #golfTable thead th {
   text-align: center;
 }
 
-/* Wochenenden hervorheben (Datum fett) */
 table.dataTable tbody tr.weekend td:first-child {
   font-weight: bold;
 }
 
-/* Moderner Button für "Spalten ein/ausblenden" */
 a.dt-button.modern-btn {
   background: #34495e !important;
   color: #ffffff !important;
@@ -128,7 +112,6 @@ a.dt-button.modern-btn:hover {
   box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
-/* Namensspalten schmaler darstellen */
 #golfTable th:nth-child(n+6),
 #golfTable td:nth-child(n+6) {
   width: 70px;
@@ -138,31 +121,26 @@ a.dt-button.modern-btn:hover {
   font-size: 11px;
 }
 
-/* Vertikale Linien zwischen allen Spalten */
 #golfTable th,
 #golfTable td {
   border-right: 1px solid #e6eaef;
 }
 
-/* Letzte Spalte ohne rechte Linie */
 #golfTable th:last-child,
 #golfTable td:last-child {
   border-right: none;
 }
 
-/* Feine horizontale Linien */
 #golfTable tbody td {
   border-top: 1px solid #eef2f6;
 }
 
-/* Fixierte Spalten: exakt gleicher Hintergrund wie Haupttabelle */
 table.dataTable,
 table.dataTable tbody td,
 table.dataTable thead th {
   background-color: #ffffff;
 }
 
-/* FixedColumns Container angleichen */
 .dtfc-fixed-left,
 .dtfc-fixed-left table,
 .dtfc-fixed-left thead th,
@@ -170,34 +148,28 @@ table.dataTable thead th {
   background-color: #ffffff !important;
 }
 
-/* Leichte Trennkante statt Hintergrundfarbe */
 .dtfc-fixed-left {
   box-shadow: 3px 0 5px rgba(0,0,0,0.04);
 }
 
-     
 </style>
 </head>
 
 <body>
 
-<!-- =========================================================
-     SEITENKOPF
-     ========================================================= -->
 <h1>Teneriffa 2026/2027</h1>
 
-<!-- Ortsfilter -->
+<!-- Toggle Chips -->
 <div class="toolbar">
-  <button onclick="filterOrt('')">Alle Orte</button>
-  <button onclick="filterOrt('AM')">AM</button>
-  <button onclick="filterOrt('DS')">DS</button>
-  <button onclick="filterOrt('AD')">AD</button>
-  <button onclick="filterOrt('LA')">LA</button>
-  <button onclick="filterOrt('BV')">BV</button>
-  <button onclick="filterOrt('RE')">RE</button>
+  <div class="chip active" data-ort="">Alle</div>
+  <div class="chip" data-ort="AM">AM</div>
+  <div class="chip" data-ort="DS">DS</div>
+  <div class="chip" data-ort="AD">AD</div>
+  <div class="chip" data-ort="LA">LA</div>
+  <div class="chip" data-ort="BV">BV</div>
+  <div class="chip" data-ort="RE">RE</div>
 </div>
 
-<!-- Tabelle (wird dynamisch mit CSV befüllt) -->
 <table id="golfTable" class="display nowrap" style="width:100%">
   <thead></thead>
   <tbody></tbody>
@@ -205,48 +177,38 @@ table.dataTable thead th {
 
 <script>
 
-/* =========================================================
-   KONFIGURATION
-   ========================================================= */
+const COL_DATE = 0;
+const COL_ORT  = 1;
+const COL_NAME_START = 7;
 
-/* Spalten-Indizes */
-const COL_DATE = 0;        // Datumsspalte
-const COL_ORT  = 1;        // Ortsspalte
-const COL_NAME_START = 7;  // Ab dieser Spalte beginnen die Namen
+let table;
 
-let table; // DataTable-Instanz
-
-
-/* =========================================================
-   HILFSFUNKTIONEN
-   ========================================================= */
-
-/* Wandelt "dd.mm.yyyy" in ein Date-Objekt um */
 function parseDate(dateStr) {
   const parts = dateStr.split(".");
   return new Date(parts[2], parts[1] - 1, parts[0]);
 }
 
-/* Prüft, ob ein Datum auf Samstag oder Sonntag fällt */
 function isWeekend(dateStr) {
   const d = parseDate(dateStr);
   const day = d.getDay();
   return day === 0 || day === 6;
 }
 
-/* Filtert Tabelle nach Ort */
-function filterOrt(value) {
-  table.column(COL_ORT).search(value).draw();
+function initChips() {
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', function () {
+
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+
+      const value = this.dataset.ort;
+      table.column(COL_ORT).search(value).draw();
+    });
+  });
 }
-
-
-/* =========================================================
-   HAUPTLOGIK
-   ========================================================= */
 
 document.addEventListener("DOMContentLoaded", function () {
 
-  /* CSV-Datei mit Cache-Verhinderung laden */
   const csvUrl = "https://dariolorenzon.github.io/Teneriffa/golfplan.csv?v=" + Date.now();
 
   Papa.parse(csvUrl, {
@@ -257,37 +219,30 @@ document.addEventListener("DOMContentLoaded", function () {
     complete: function(results) {
 
       const rows = results.data;
-      const headers = rows[0];     // Erste Zeile = Spaltenüberschriften
-      const data = rows.slice(1);  // Rest = Daten
+      const headers = rows[0];
+      const data = rows.slice(1);
 
-      /* Tabellenkopf dynamisch erzeugen */
       const theadRow =
         '<tr>' +
         headers.map((h, index) => {
-
-          /* Namen zweizeilig darstellen */
           if (index >= COL_NAME_START) {
             const parts = h.split(" ");
             if (parts.length >= 2) {
               return `<th>${parts[0]}<br>${parts[1]}</th>`;
             }
           }
-
           return `<th>${h}</th>`;
-
         }).join('') +
         '</tr>';
 
       document.querySelector('#golfTable thead').innerHTML = theadRow;
 
-      /* DataTable initialisieren */
       table = $('#golfTable').DataTable({
 
-        dom: '<"topbar"B>rtip',  
+        dom: '<"topbar"B>rtip',
         paging: false,
-        searching: true,
+        searching: false,
 
-        /* Spalten ein/ausblenden Button */
         buttons: [{
           extend: 'colvis',
           text: '☰ Spalten ein/ausblenden',
@@ -295,93 +250,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }],
 
         data: data,
-
         scrollX: true,
         scrollY: "70vh",
         scrollCollapse: true,
-
         order: [[COL_DATE, "asc"]],
         fixedColumns: { leftColumns: 2 },
-        fixedHeader: true,
-
-        columnDefs: [
-
-          /* Spalten 4 und 5 standardmässig ausblenden */
-          { targets: [4, 5], visible: false },
-
-          /* Datum korrekt sortieren */
-          {
-            targets: COL_DATE,
-            render: function(data, type) {
-              if (type === "sort") {
-                return parseDate(data).getTime();
-              }
-              return data;
-            }
-          },
-
-          /* Alles zentrieren */
-          {
-            targets: "_all",
-            className: "dt-center"
-          },
-
-          /* Namen zweizeilig darstellen */
-          {
-            targets: function(index) {
-              return index >= COL_NAME_START;
-            },
-            render: function(data, type) {
-              if (type === "display" && data) {
-                const parts = data.split(" ");
-                if (parts.length >= 2) {
-                  return parts[0] + "<br>" + parts[1];
-                }
-              }
-              return data;
-            }
-          }
-
-        ],
-
-        /* Wochenenden markieren */
-        createdRow: function(row, rowData) {
-          if (isWeekend(rowData[COL_DATE])) {
-            $(row).addClass("weekend");
-          }
-        }
-
-      });
-
-    }
-
-  });
-
-  /* Automatisches Neuladen alle 30 Minuten */
-  setInterval(function() {
-    location.reload();
-  }, 30 * 60 * 1000);
-
-});
-
-</script>
-
-</body>
-</html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        fixedHeader:
