@@ -136,6 +136,17 @@ a.dt-button.modern-btn:hover {
   border-top: 1px solid #eef2f6;
 }
 
+/* Fixierte Spalten optisch nicht hervorheben */
+.dtfc-fixed-left {
+  background-color: white !important;
+}
+
+/* Sicherstellen, dass auch Header identisch bleibt */
+.dtfc-fixed-left thead th,
+.dtfc-fixed-left tbody td {
+  background-color: white !important;
+}
+
 
 /* Scroll-Richtung kontrollieren (Mobile Fix) */
 div.dataTables_scrollBody {
@@ -336,6 +347,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
