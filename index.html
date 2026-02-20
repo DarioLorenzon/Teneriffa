@@ -258,4 +258,49 @@ document.addEventListener("DOMContentLoaded", function () {
         fixedColumns: { leftColumns: 2 },
         fixedHeader: true,
 
+                columnDefs: [
+          { targets: [4, 5], visible: false },
+          {
+            targets: COL_DATE,
+            render: function(data, type) {
+              if (type === "sort") return parseDate(data).getTime();
+              return data;
+            }
+          },
+          { targets: "_all", className: "dt-center" },
+          {
+            targets: function(index) { return index >= COL_NAME_START; },
+            render: function(data, type) {
+              if (type === "display" && data) {
+                const parts = data.split(" ");
+                if (parts.length >= 2) return parts[0] + "<br>" + parts[1];
+              }
+              return data;
+            }
+          }
+        ],
+
+        createdRow: function(row, rowData) {
+          if (isWeekend(rowData[COL_DATE])) {
+            $(row).addClass("weekend");
+          }
+        }
+
+      });
+
+      initChips();
+
+    }
+  });
+
+  setInterval(function() {
+    location.reload();
+  }, 30 * 60 * 1000);
+
+});
+</script>
+
+</body>
+</html>
+
 
