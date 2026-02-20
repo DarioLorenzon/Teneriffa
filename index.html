@@ -136,16 +136,26 @@ a.dt-button.modern-btn:hover {
   border-top: 1px solid #eef2f6;
 }
 
-/* Fixierte Spalten optisch nicht hervorheben */
-.dtfc-fixed-left {
-  background-color: inherit !important;
+/* Fixierte Spalten: exakt gleicher Hintergrund wie Haupttabelle */
+table.dataTable,
+table.dataTable tbody td,
+table.dataTable thead th {
+  background-color: #ffffff;
 }
 
-/* Sicherstellen, dass auch Header identisch bleibt */
+/* FixedColumns Container angleichen */
+.dtfc-fixed-left,
+.dtfc-fixed-left table,
 .dtfc-fixed-left thead th,
 .dtfc-fixed-left tbody td {
-  background-color: inherit !important;
+  background-color: #ffffff !important;
 }
+
+/* Leichte Trennkante statt Hintergrundfarbe */
+.dtfc-fixed-left {
+  box-shadow: 3px 0 5px rgba(0,0,0,0.04);
+}
+
      
 </style>
 </head>
@@ -339,6 +349,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
