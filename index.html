@@ -96,6 +96,30 @@ a.dt-button.modern-btn:hover {
 a.dt-button.modern-btn:focus {
   outline: none !important;
 }
+
+/* Namensspalten schmaler machen */
+#golfTable th:nth-child(n+8),
+#golfTable td:nth-child(n+8) {
+  width: 70px;
+  min-width: 70px;
+  max-width: 70px;
+  padding: 3px 4px !important;
+  font-size: 11px;
+}
+
+/* Feine vertikale Linien zwischen Namensspalten */
+#golfTable th:nth-child(n+8),
+#golfTable td:nth-child(n+8) {
+  border-right: 1px solid #e1e5ea;
+}
+
+/* Letzte Spalte ohne rechte Linie */
+#golfTable th:last-child,
+#golfTable td:last-child {
+  border-right: none;
+}
+
+  
 </style>
 </head>
 
@@ -254,3 +278,4 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
