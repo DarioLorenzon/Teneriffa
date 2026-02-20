@@ -136,6 +136,22 @@ a.dt-button.modern-btn:hover {
   border-top: 1px solid #eef2f6;
 }
 
+
+/* Scroll-Richtung kontrollieren (Mobile Fix) */
+div.dataTables_scrollBody {
+  touch-action: pan-x pan-y;
+}
+
+/* Optional: Nur vertikales Scrollen erlauben */
+@media (max-width: 768px) {
+  div.dataTables_scrollBody {
+    touch-action: pan-y;
+  }
+}
+
+
+
+     
 </style>
 </head>
 
@@ -328,5 +344,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
