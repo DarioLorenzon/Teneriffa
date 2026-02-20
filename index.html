@@ -239,7 +239,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       table = $('#golfTable').DataTable({
 
-        dom: '<"topbar"B>rtip',
+        dom: 'Brt',
         paging: false,
         searching: true,
 
@@ -256,5 +256,6 @@ document.addEventListener("DOMContentLoaded", function () {
         scrollCollapse: true,
         order: [[COL_DATE, "asc"]],
         fixedColumns: { leftColumns: 2 },
-        fixedHeader:
+        fixedHeader: true,
+
 
