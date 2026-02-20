@@ -45,6 +45,38 @@ h1 {
   margin-bottom: 15px;
 }
 
+/* === Topbar Layout === */
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Buttons links */
+div.dt-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+/* Suchfeld rechts (falls aktiviert) */
+.dataTables_filter {
+  margin-left: auto;
+}
+
+/* Filter-Toolbar darunter sauber absetzen */
+.toolbar {
+  margin-bottom: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+
+     
 /* Toolbar für Ortsfilter */
 .toolbar {
   margin-bottom: 15px;
@@ -264,7 +296,7 @@ document.addEventListener("DOMContentLoaded", function () {
       /* DataTable initialisieren */
       table = $('#golfTable').DataTable({
 
-        dom: 'Brtip',
+        dom: '<"topbar"Bf>rtip',
         paging: false,
         searching: true,
 
@@ -349,6 +381,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
