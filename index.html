@@ -107,17 +107,23 @@ a.dt-button.modern-btn:focus {
   font-size: 11px;
 }
 
-/* Feine vertikale Linien zwischen Namensspalten */
-#golfTable th:nth-child(n+6),
-#golfTable td:nth-child(n+6) {
-  border-right: 1px solid #e1e5ea;
+/* Feine vertikale Linien für alle Spalten */
+#golfTable th,
+#golfTable td {
+  border-right: 1px solid #e6eaef;
 }
 
-/* Letzte Spalte ohne rechte Linie */
+/* Keine Linie ganz rechts */
 #golfTable th:last-child,
 #golfTable td:last-child {
   border-right: none;
 }
+
+/* Optional: auch horizontale Linien etwas feiner */
+#golfTable tbody td {
+  border-top: 1px solid #eef2f6;
+}
+
 
   
 </style>
@@ -278,5 +284,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
