@@ -129,27 +129,35 @@ div.dt-buttons .dt-button.active {
   font-size: 11px;
 }
 
-#golfTable th,
-#golfTable td {
+/* =========================================
+   Einheitliche vertikale Linien – überall
+   ========================================= */
+
+/* Body */
+#golfTable tbody td {
   border-right: 1px solid #e6eaef;
 }
 
-/* Vertikale Linien auch im Tabellenkopf (inkl. FixedHeader & FixedColumns) */
-
-#golfTable thead th {
+/* Sichtbarer Scroll-Header */
+.dataTables_scrollHead table th {
   border-right: 1px solid #e6eaef !important;
 }
 
-#golfTable thead th:last-child {
-  border-right: none !important;
-}
-
-/* FixedHeader Kopie */
-table.dataTable.fixedHeader-floating th {
+/* FixedHeader (wenn man scrollt) */
+.fixedHeader-floating th {
   border-right: 1px solid #e6eaef !important;
 }
 
-table.dataTable.fixedHeader-floating th:last-child {
+/* FixedColumns links */
+.dtfc-fixed-left table th,
+.dtfc-fixed-left table td {
+  border-right: 1px solid #e6eaef !important;
+}
+
+/* Letzte Spalte ohne Linie */
+.dataTables_scrollHead table th:last-child,
+#golfTable tbody td:last-child,
+.fixedHeader-floating th:last-child {
   border-right: none !important;
 }
 
@@ -420,4 +428,5 @@ document.addEventListener("DOMContentLoaded", initApp);
 
 </body>
 </html>
+
 
