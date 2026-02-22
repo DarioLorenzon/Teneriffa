@@ -28,7 +28,26 @@ body {
   font-size: 13px;
 }
 
-h1 { margin-bottom: 13px; }
+h1 {
+  margin-bottom: 13px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+div.dt-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;   /* Abstand zur Tabelle */
+}
+
+/* === Toggle Chips === */
 
 .toolbar {
   margin-bottom: 15px;
@@ -48,7 +67,9 @@ h1 { margin-bottom: 13px; }
   user-select: none;
 }
 
-.chip:hover { background: #d5dde6; }
+.chip:hover {
+  background: #d5dde6;
+}
 
 .chip.active {
   background: #2c3e50;
@@ -56,11 +77,27 @@ h1 { margin-bottom: 13px; }
   box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
 
-div.dt-buttons {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 10px;
+div.dataTables_wrapper {
+  overflow-x: auto;
 }
+
+table.dataTable tbody td {
+  padding: 4px 6px;
+  line-height: 1.1;
+  font-size: 12px;
+}
+
+#golfTable tbody td,
+#golfTable thead th {
+  text-align: center;
+}
+
+table.dataTable tbody tr.weekend td:first-child {
+  font-weight: bold;
+}
+
+/* === Spalten ein/ausblenden === */
+/* === ColVis Button wie Chip stylen === */
 
 div.dt-buttons .dt-button {
   padding: 6px 14px !important;
@@ -70,15 +107,17 @@ div.dt-buttons .dt-button {
   color: #2c3e50 !important;
   border: none !important;
   box-shadow: none !important;
+  transition: all 0.2s ease !important;
 }
 
 div.dt-buttons .dt-button:hover {
   background: #d5dde6 !important;
 }
 
-#golfTable tbody td,
-#golfTable thead th {
-  text-align: center;
+div.dt-buttons .dt-button:active,
+div.dt-buttons .dt-button.active {
+  background: #2c3e50 !important;
+  color: #ffffff !important;
 }
 
 #golfTable th:nth-child(n+6),
@@ -90,40 +129,46 @@ div.dt-buttons .dt-button:hover {
   font-size: 11px;
 }
 
-/* ===== Chrome Width Fix ===== */
+/* =========================================
+   Einheitliche vertikale Linien – überall
+   ========================================= */
 
-table.dataTable {
-  table-layout: fixed !important;
-}
-
-.dataTables_scrollHead table,
-.dataTables_scrollBody table {
-  width: 100% !important;
-}
-
-/* ===== Vertikale Linien ===== */
-
+/* Body */
 #golfTable tbody td {
   border-right: 1px solid #e6eaef;
 }
 
+/* Sichtbarer Scroll-Header */
 .dataTables_scrollHead table th {
   border-right: 1px solid #e6eaef !important;
 }
 
+/* FixedHeader (wenn man scrollt) */
 .fixedHeader-floating th {
   border-right: 1px solid #e6eaef !important;
 }
 
+/* FixedColumns links */
 .dtfc-fixed-left table th,
 .dtfc-fixed-left table td {
   border-right: 1px solid #e6eaef !important;
 }
 
+/* Letzte Spalte ohne Linie */
 .dataTables_scrollHead table th:last-child,
 #golfTable tbody td:last-child,
 .fixedHeader-floating th:last-child {
   border-right: none !important;
+}
+
+/* FixedColumns linker Bereich */
+.dtfc-fixed-left thead th {
+  border-right: 1px solid #e6eaef !important;
+}  
+
+#golfTable th:last-child,
+#golfTable td:last-child {
+  border-right: none;
 }
 
 #golfTable tbody td {
@@ -154,6 +199,7 @@ table.dataTable thead th {
 
 <h1>Teneriffa 2026/2027</h1>
 
+<!-- Toggle Chips -->
 <div class="toolbar">
   <div class="chip active" data-ort="">Alle</div>
   <div class="chip" data-ort="AM">AM</div>
@@ -171,41 +217,73 @@ table.dataTable thead th {
 
 <script>
 
+/* ==========================================================
+    KONFIGURATION
+   ========================================================== */
+
 const CONFIG = {
   csvUrl: "https://dariolorenzon.github.io/Teneriffa/golfplan.csv",
   delimiter: ";",
-  columns: { date: 0, ort: 1, nameStart: 7 }
+  columns: {
+    date: 0,
+    ort: 1,
+    nameStart: 7
+  }
 };
 
 let tableInstance = null;
 
+
+/* ==========================================================
+    UTILITY FUNKTIONEN
+   ========================================================== */
+
+/**
+ * Wandelt dd.mm.yyyy in Date-Objekt um
+ */
 function parseDate(dateStr) {
   const parts = dateStr.split(".");
   return new Date(parts[2], parts[1] - 1, parts[0]);
 }
 
+/**
+ * Prüft ob Datum Wochenende ist
+ */
 function isWeekend(dateStr) {
   const day = parseDate(dateStr).getDay();
   return day === 0 || day === 6;
 }
 
+/**
+ * Erzeugt Tabellenkopf dynamisch
+ */
 function buildTableHeader(headers) {
+
   return `
     <tr>
       ${headers.map((header, index) => {
+
         if (index >= CONFIG.columns.nameStart) {
           const parts = header.split(" ");
           if (parts.length >= 2) {
             return `<th>${parts[0]}<br>${parts[1]}</th>`;
           }
         }
+
         return `<th>${header}</th>`;
+
       }).join("")}
     </tr>
   `;
 }
 
+
+/* ==========================================================
+    CHIP FILTER LOGIK
+   ========================================================== */
+
 function activateChip(chipElement) {
+
   document.querySelectorAll('.chip')
     .forEach(c => c.classList.remove('active'));
 
@@ -220,23 +298,46 @@ function activateChip(chipElement) {
 }
 
 function initChips() {
+
   document.querySelectorAll('.chip')
     .forEach(chip => {
-      chip.addEventListener("click", () => activateChip(chip));
+
+      chip.addEventListener("click", () => {
+        activateChip(chip);
+      });
+
     });
 }
 
+
+/* ==========================================================
+    DATEN LADEN
+   ========================================================== */
+
 function loadCsvData(callback) {
+
   Papa.parse(`${CONFIG.csvUrl}?v=${Date.now()}`, {
+
     download: true,
     delimiter: CONFIG.delimiter,
     skipEmptyLines: true,
+
     complete: function(results) {
+
       const rows = results.data;
-      callback(rows[0], rows.slice(1));
+      const headers = rows[0];
+      const data = rows.slice(1);
+
+      callback(headers, data);
     }
+
   });
 }
+
+
+/* ==========================================================
+    DATATABLE INITIALISIERUNG
+   ========================================================== */
 
 function initDataTable(headers, data) {
 
@@ -248,7 +349,6 @@ function initDataTable(headers, data) {
     dom: 'Brt',
     paging: false,
     searching: true,
-    autoWidth: false,   // ✅ Chrome Fix
 
     buttons: [{
       extend: 'colvis',
@@ -284,12 +384,14 @@ function initDataTable(headers, data) {
           return index >= CONFIG.columns.nameStart;
         },
         render: function(data, type) {
+
           if (type === "display" && data) {
             const parts = data.split(" ");
             if (parts.length >= 2) {
               return parts[0] + "<br>" + parts[1];
             }
           }
+
           return data;
         }
       }
@@ -304,10 +406,19 @@ function initDataTable(headers, data) {
   });
 }
 
+
+/* ==========================================================
+    APP START
+   ========================================================== */
+
 function initApp() {
+
   loadCsvData((headers, data) => {
+
     initDataTable(headers, data);
+
     initChips();
+
   });
 }
 
@@ -317,3 +428,6 @@ document.addEventListener("DOMContentLoaded", initApp);
 
 </body>
 </html>
+
+
+
