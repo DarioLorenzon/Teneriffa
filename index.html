@@ -213,68 +213,108 @@ table.dataTable tbody tr.weekend td:first-child {
 <script>
 
 /* ==========================================================
-   KONSTANTEN
+   1️⃣ KONFIGURATION
    ========================================================== */
 
-const COL_DATE = 0;        // Datumsspalte
-const COL_ORT  = 1;        // Ortsspalte
-const COL_NAME_START = 7;  // Ab dieser Spalte Namensfelder
+const CONFIG = {
+  csvUrl: "https://dariolorenzon.github.io/Teneriffa/golfplan.csv",
+  delimiter: ";",
+  columns: {
+    date: 0,
+    ort: 1,
+    nameStart: 7
+  }
+};
 
-let table;
+let tableInstance = null;
+
 
 /* ==========================================================
-   DATUMS-HILFSFUNKTIONEN
+   2️⃣ UTILITY FUNKTIONEN
    ========================================================== */
 
-// Wandelt "dd.mm.yyyy" in ein Date-Objekt um
+/**
+ * Wandelt dd.mm.yyyy in Date-Objekt um
+ */
 function parseDate(dateStr) {
   const parts = dateStr.split(".");
   return new Date(parts[2], parts[1] - 1, parts[0]);
 }
 
-// Prüft ob Datum auf Wochenende fällt
+/**
+ * Prüft ob Datum Wochenende ist
+ */
 function isWeekend(dateStr) {
-  const d = parseDate(dateStr);
-  const day = d.getDay();
+  const day = parseDate(dateStr).getDay();
   return day === 0 || day === 6;
 }
 
+/**
+ * Erzeugt Tabellenkopf dynamisch
+ */
+function buildTableHeader(headers) {
+
+  return `
+    <tr>
+      ${headers.map((header, index) => {
+
+        if (index >= CONFIG.columns.nameStart) {
+          const parts = header.split(" ");
+          if (parts.length >= 2) {
+            return `<th>${parts[0]}<br>${parts[1]}</th>`;
+          }
+        }
+
+        return `<th>${header}</th>`;
+
+      }).join("")}
+    </tr>
+  `;
+}
+
+
 /* ==========================================================
-   CHIP-FILTER INITIALISIEREN
+   3️⃣ CHIP FILTER LOGIK
    ========================================================== */
+
+function activateChip(chipElement) {
+
+  document.querySelectorAll('.chip')
+    .forEach(c => c.classList.remove('active'));
+
+  chipElement.classList.add('active');
+
+  const filterValue = chipElement.dataset.ort;
+
+  tableInstance
+    .column(CONFIG.columns.ort)
+    .search(filterValue)
+    .draw();
+}
 
 function initChips() {
 
-  document.querySelectorAll('.chip').forEach(chip => {
+  document.querySelectorAll('.chip')
+    .forEach(chip => {
 
-    chip.addEventListener('click', function () {
+      chip.addEventListener("click", () => {
+        activateChip(chip);
+      });
 
-      // aktiven Status umschalten
-      document.querySelectorAll('.chip')
-        .forEach(c => c.classList.remove('active'));
-
-      this.classList.add('active');
-
-      // DataTables-Spaltenfilter anwenden
-      const value = this.dataset.ort;
-      table.column(COL_ORT).search(value).draw();
     });
-  });
 }
 
+
 /* ==========================================================
-   HAUPTINITIALISIERUNG
+   4️⃣ DATEN LADEN
    ========================================================== */
 
-document.addEventListener("DOMContentLoaded", function () {
+function loadCsvData(callback) {
 
-  const csvUrl =
-    "https://dariolorenzon.github.io/Teneriffa/golfplan.csv?v=" + Date.now();
-
-  Papa.parse(csvUrl, {
+  Papa.parse(`${CONFIG.csvUrl}?v=${Date.now()}`, {
 
     download: true,
-    delimiter: ";",
+    delimiter: CONFIG.delimiter,
     skipEmptyLines: true,
 
     complete: function(results) {
@@ -283,89 +323,104 @@ document.addEventListener("DOMContentLoaded", function () {
       const headers = rows[0];
       const data = rows.slice(1);
 
-      /* Dynamische Tabellenkopf-Erstellung */
-      const theadRow =
-        '<tr>' +
-        headers.map((h, index) => {
-
-          // Namen zweizeilig darstellen
-          if (index >= COL_NAME_START) {
-            const parts = h.split(" ");
-            if (parts.length >= 2) {
-              return `<th>${parts[0]}<br>${parts[1]}</th>`;
-            }
-          }
-
-          return `<th>${h}</th>`;
-        }).join('') +
-        '</tr>';
-
-      document.querySelector('#golfTable thead').innerHTML = theadRow;
-
-      /* DataTable initialisieren */
-      table = $('#golfTable').DataTable({
-
-        dom: 'Brt',
-        paging: false,
-        searching: true,
-
-        buttons: [{
-          extend: 'colvis',
-          text: 'Spalten ein/ausblenden'
-        }],
-
-        data: data,
-        scrollX: true,
-        scrollY: "70vh",
-        scrollCollapse: true,
-        order: [[COL_DATE, "asc"]],
-        fixedColumns: { leftColumns: 2 },
-        fixedHeader: true,
-
-        columnDefs: [
-
-          { targets: [4, 5], visible: false },
-
-          {
-            targets: COL_DATE,
-            render: function(data, type) {
-              if (type === "sort")
-                return parseDate(data).getTime();
-              return data;
-            }
-          },
-
-          { targets: "_all", className: "dt-center" },
-
-          {
-            targets: function(index) {
-              return index >= COL_NAME_START;
-            },
-            render: function(data, type) {
-              if (type === "display" && data) {
-                const parts = data.split(" ");
-                if (parts.length >= 2)
-                  return parts[0] + "<br>" + parts[1];
-              }
-              return data;
-            }
-          }
-        ],
-
-        createdRow: function(row, rowData) {
-          if (isWeekend(rowData[COL_DATE])) {
-            $(row).addClass("weekend");
-          }
-        }
-
-      });
-
-      initChips();
+      callback(headers, data);
     }
+
   });
-});
+}
+
+
+/* ==========================================================
+   5️⃣ DATATABLE INITIALISIERUNG
+   ========================================================== */
+
+function initDataTable(headers, data) {
+
+  document.querySelector('#golfTable thead').innerHTML =
+    buildTableHeader(headers);
+
+  tableInstance = $('#golfTable').DataTable({
+
+    dom: 'Brt',
+    paging: false,
+    searching: true,
+
+    buttons: [{
+      extend: 'colvis',
+      text: 'Spalten ein/ausblenden'
+    }],
+
+    data: data,
+    scrollX: true,
+    scrollY: "70vh",
+    scrollCollapse: true,
+    order: [[CONFIG.columns.date, "asc"]],
+    fixedColumns: { leftColumns: 2 },
+    fixedHeader: true,
+
+    columnDefs: [
+
+      { targets: [4, 5], visible: false },
+
+      {
+        targets: CONFIG.columns.date,
+        render: function(data, type) {
+          if (type === "sort") {
+            return parseDate(data).getTime();
+          }
+          return data;
+        }
+      },
+
+      { targets: "_all", className: "dt-center" },
+
+      {
+        targets: function(index) {
+          return index >= CONFIG.columns.nameStart;
+        },
+        render: function(data, type) {
+
+          if (type === "display" && data) {
+            const parts = data.split(" ");
+            if (parts.length >= 2) {
+              return parts[0] + "<br>" + parts[1];
+            }
+          }
+
+          return data;
+        }
+      }
+    ],
+
+    createdRow: function(row, rowData) {
+      if (isWeekend(rowData[CONFIG.columns.date])) {
+        $(row).addClass("weekend");
+      }
+    }
+
+  });
+}
+
+
+/* ==========================================================
+   6️⃣ APP START
+   ========================================================== */
+
+function initApp() {
+
+  loadCsvData((headers, data) => {
+
+    initDataTable(headers, data);
+
+    initChips();
+
+  });
+}
+
+document.addEventListener("DOMContentLoaded", initApp);
 
 </script>
 
 </body>
 </html>
+
