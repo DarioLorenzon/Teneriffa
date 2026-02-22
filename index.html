@@ -1,219 +1,108 @@
-<!DOCTYPE html>
-<html lang="de-CH">
-<head>
-<meta charset="UTF-8">
-<title>Teneriffa 2026/2027</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<!-- DataTables Styles -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.3.0/css/fixedColumns.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css">
-
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
-<script src="https://cdn.datatables.net/fixedcolumns/4.3.0/js/dataTables.fixedColumns.min.js"></script>
-<script src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-
-<style>
-
-body {
-  font-family: Arial, sans-serif;
-  margin: 15px;
-  background: #f2f4f7;
-  font-size: 13px;
-}
-
-h1 {
-  margin-bottom: 13px;
-}
-
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-div.dt-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-/* === Toggle Chips === */
-
-.toolbar {
-  margin-bottom: 15px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.chip {
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 12px;
-  cursor: pointer;
-  background: #e3e8ee;
-  color: #2c3e50;
-  transition: all 0.2s ease;
-  user-select: none;
-}
-
-.chip:hover {
-  background: #d5dde6;
-}
-
-.chip.active {
-  background: #2c3e50;
-  color: white;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-}
-
-div.dataTables_wrapper {
-  overflow-x: auto;
-}
-
-table.dataTable tbody td {
-  padding: 4px 6px;
-  line-height: 1.1;
-  font-size: 12px;
-}
-
-#golfTable tbody td,
-#golfTable thead th {
-  text-align: center;
-}
-
-table.dataTable tbody tr.weekend td:first-child {
-  font-weight: bold;
-}
-
-a.dt-button.modern-btn {
-  background: #34495e !important;
-  color: #ffffff !important;
-  border-radius: 6px !important;
-  padding: 6px 12px !important;
-  font-size: 12px !important;
-  border: none !important;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-a.dt-button.modern-btn:hover {
-  background: #1f2d3a !important;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-#golfTable th:nth-child(n+6),
-#golfTable td:nth-child(n+6) {
-  width: 70px;
-  min-width: 70px;
-  max-width: 70px;
-  padding: 3px 3px !important;
-  font-size: 11px;
-}
-
-#golfTable th,
-#golfTable td {
-  border-right: 1px solid #e6eaef;
-}
-
-#golfTable th:last-child,
-#golfTable td:last-child {
-  border-right: none;
-}
-
-#golfTable tbody td {
-  border-top: 1px solid #eef2f6;
-}
-
-table.dataTable,
-table.dataTable tbody td,
-table.dataTable thead th {
-  background-color: #ffffff;
-}
-
-.dtfc-fixed-left,
-.dtfc-fixed-left table,
-.dtfc-fixed-left thead th,
-.dtfc-fixed-left tbody td {
-  background-color: #ffffff !important;
-}
-
-.dtfc-fixed-left {
-  box-shadow: 3px 0 5px rgba(0,0,0,0.04);
-}
-
-</style>
-</head>
-
-<body>
-
-<h1>Teneriffa 2026/2027</h1>
-
-<!-- Toggle Chips -->
-<div class="toolbar">
-  <div class="chip active" data-ort="">Alle</div>
-  <div class="chip" data-ort="AM">AM</div>
-  <div class="chip" data-ort="DS">DS</div>
-  <div class="chip" data-ort="AD">AD</div>
-  <div class="chip" data-ort="LA">LA</div>
-  <div class="chip" data-ort="BV">BV</div>
-  <div class="chip" data-ort="RE">RE</div>
-</div>
-
-<table id="golfTable" class="display nowrap" style="width:100%">
-  <thead></thead>
-  <tbody></tbody>
-</table>
-
 <script>
 
-const COL_DATE = 0;
-const COL_ORT  = 1;
-const COL_NAME_START = 7;
+/* ==========================================================
+   1️⃣ KONFIGURATION
+   ========================================================== */
 
-let table;
+const CONFIG = {
+  csvUrl: "https://dariolorenzon.github.io/Teneriffa/golfplan.csv",
+  delimiter: ";",
+  columns: {
+    date: 0,
+    ort: 1,
+    nameStart: 7
+  }
+};
 
+let tableInstance = null;
+
+
+/* ==========================================================
+   2️⃣ UTILITY FUNKTIONEN
+   ========================================================== */
+
+/**
+ * Wandelt dd.mm.yyyy in Date-Objekt um
+ */
 function parseDate(dateStr) {
   const parts = dateStr.split(".");
   return new Date(parts[2], parts[1] - 1, parts[0]);
 }
 
+/**
+ * Prüft ob Datum Wochenende ist
+ */
 function isWeekend(dateStr) {
-  const d = parseDate(dateStr);
-  const day = d.getDay();
+  const day = parseDate(dateStr).getDay();
   return day === 0 || day === 6;
 }
 
-function initChips() {
-  document.querySelectorAll('.chip').forEach(chip => {
-    chip.addEventListener('click', function () {
+/**
+ * Erzeugt Tabellenkopf dynamisch
+ */
+function buildTableHeader(headers) {
 
-      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-      this.classList.add('active');
+  return `
+    <tr>
+      ${headers.map((header, index) => {
 
-      const value = this.dataset.ort;
-      table.column(COL_ORT).search(value).draw();
-    });
-  });
+        if (index >= CONFIG.columns.nameStart) {
+          const parts = header.split(" ");
+          if (parts.length >= 2) {
+            return `<th>${parts[0]}<br>${parts[1]}</th>`;
+          }
+        }
+
+        return `<th>${header}</th>`;
+
+      }).join("")}
+    </tr>
+  `;
 }
 
-document.addEventListener("DOMContentLoaded", function () {
 
-  const csvUrl = "https://dariolorenzon.github.io/Teneriffa/golfplan.csv?v=" + Date.now();
+/* ==========================================================
+   3️⃣ CHIP FILTER LOGIK
+   ========================================================== */
 
-  Papa.parse(csvUrl, {
+function activateChip(chipElement) {
+
+  document.querySelectorAll('.chip')
+    .forEach(c => c.classList.remove('active'));
+
+  chipElement.classList.add('active');
+
+  const filterValue = chipElement.dataset.ort;
+
+  tableInstance
+    .column(CONFIG.columns.ort)
+    .search(filterValue)
+    .draw();
+}
+
+function initChips() {
+
+  document.querySelectorAll('.chip')
+    .forEach(chip => {
+
+      chip.addEventListener("click", () => {
+        activateChip(chip);
+      });
+
+    });
+}
+
+
+/* ==========================================================
+   4️⃣ DATEN LADEN
+   ========================================================== */
+
+function loadCsvData(callback) {
+
+  Papa.parse(`${CONFIG.csvUrl}?v=${Date.now()}`, {
+
     download: true,
-    delimiter: ";",
+    delimiter: CONFIG.delimiter,
     skipEmptyLines: true,
 
     complete: function(results) {
@@ -222,84 +111,100 @@ document.addEventListener("DOMContentLoaded", function () {
       const headers = rows[0];
       const data = rows.slice(1);
 
-      const theadRow =
-        '<tr>' +
-        headers.map((h, index) => {
-          if (index >= COL_NAME_START) {
-            const parts = h.split(" ");
-            if (parts.length >= 2) {
-              return `<th>${parts[0]}<br>${parts[1]}</th>`;
-            }
-          }
-          return `<th>${h}</th>`;
-        }).join('') +
-        '</tr>';
-
-      document.querySelector('#golfTable thead').innerHTML = theadRow;
-
-      table = $('#golfTable').DataTable({
-
-        dom: '<"topbar"B>rtip',
-        paging: false,
-        searching: true,
-
-        buttons: [{
-          extend: 'colvis',
-          text: '☰ Spalten ein/ausblenden',
-          className: 'modern-btn'
-        }],
-
-        data: data,
-        scrollX: true,
-        scrollY: "70vh",
-        scrollCollapse: true,
-        order: [[COL_DATE, "asc"]],
-        fixedColumns: { leftColumns: 2 },
-        fixedHeader: true,
-
-        columnDefs: [
-          { targets: [4, 5], visible: false },
-          {
-            targets: COL_DATE,
-            render: function(data, type) {
-              if (type === "sort") return parseDate(data).getTime();
-              return data;
-            }
-          },
-          { targets: "_all", className: "dt-center" },
-          {
-            targets: function(index) { return index >= COL_NAME_START; },
-            render: function(data, type) {
-              if (type === "display" && data) {
-                const parts = data.split(" ");
-                if (parts.length >= 2) return parts[0] + "<br>" + parts[1];
-              }
-              return data;
-            }
-          }
-        ],
-
-        createdRow: function(row, rowData) {
-          if (isWeekend(rowData[COL_DATE])) {
-            $(row).addClass("weekend");
-          }
-        }
-
-      });
-
-      initChips();
-
+      callback(headers, data);
     }
 
   });
+}
 
-  setInterval(function() {
-    location.reload();
-  }, 30 * 60 * 1000);
 
-});
+/* ==========================================================
+   5️⃣ DATATABLE INITIALISIERUNG
+   ========================================================== */
+
+function initDataTable(headers, data) {
+
+  document.querySelector('#golfTable thead').innerHTML =
+    buildTableHeader(headers);
+
+  tableInstance = $('#golfTable').DataTable({
+
+    dom: 'Brt',
+    paging: false,
+    searching: true,
+
+    buttons: [{
+      extend: 'colvis',
+      text: 'Spalten ein/ausblenden'
+    }],
+
+    data: data,
+    scrollX: true,
+    scrollY: "70vh",
+    scrollCollapse: true,
+    order: [[CONFIG.columns.date, "asc"]],
+    fixedColumns: { leftColumns: 2 },
+    fixedHeader: true,
+
+    columnDefs: [
+
+      { targets: [4, 5], visible: false },
+
+      {
+        targets: CONFIG.columns.date,
+        render: function(data, type) {
+          if (type === "sort") {
+            return parseDate(data).getTime();
+          }
+          return data;
+        }
+      },
+
+      { targets: "_all", className: "dt-center" },
+
+      {
+        targets: function(index) {
+          return index >= CONFIG.columns.nameStart;
+        },
+        render: function(data, type) {
+
+          if (type === "display" && data) {
+            const parts = data.split(" ");
+            if (parts.length >= 2) {
+              return parts[0] + "<br>" + parts[1];
+            }
+          }
+
+          return data;
+        }
+      }
+    ],
+
+    createdRow: function(row, rowData) {
+      if (isWeekend(rowData[CONFIG.columns.date])) {
+        $(row).addClass("weekend");
+      }
+    }
+
+  });
+}
+
+
+/* ==========================================================
+   6️⃣ APP START
+   ========================================================== */
+
+function initApp() {
+
+  loadCsvData((headers, data) => {
+
+    initDataTable(headers, data);
+
+    initChips();
+
+  });
+}
+
+document.addEventListener("DOMContentLoaded", initApp);
 
 </script>
-
-</body>
-</html>
