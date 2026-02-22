@@ -95,45 +95,48 @@ table.dataTable tbody tr.weekend td:first-child {
   font-weight: bold;
 }
 
-/* === GLASS BUTTON – überschreibt DataTables sauber === */
+/* === MODERN GLASS BUTTON – komplett überschrieben === */
 
-div.dt-buttons a.dt-button.modern-btn,
-div.dt-buttons a.dt-button.modern-btn:visited {
+div.dt-buttons .dt-button.modern-btn,
+div.dt-buttons .dt-button.modern-btn span {
 
-  background: rgba(255, 255, 255, 0.35) !important;
+  background: rgba(255, 255, 255, 0.4) !important;
   color: #1f2d3a !important;
 
   border-radius: 999px !important;
-  padding: 8px 20px !important;
+  padding: 8px 22px !important;
   font-size: 12px !important;
   font-weight: 600 !important;
   letter-spacing: 0.3px;
 
-  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
 
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
 
-  box-shadow: 0 8px 24px rgba(0,0,0,0.10) !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12) !important;
 
   transition: all 0.25s ease !important;
 }
 
-/* Hover */
-div.dt-buttons a.dt-button.modern-btn:hover {
+/* Entfernt DataTables Default Background komplett */
+div.dt-buttons .dt-button.modern-btn:before,
+div.dt-buttons .dt-button.modern-btn:after {
+  display: none !important;
+}
 
-  background: rgba(255, 255, 255, 0.55) !important;
+/* Hover */
+div.dt-buttons .dt-button.modern-btn:hover {
+  background: rgba(255, 255, 255, 0.6) !important;
   transform: translateY(-2px);
-  box-shadow: 0 14px 30px rgba(0,0,0,0.18) !important;
+  box-shadow: 0 14px 35px rgba(0,0,0,0.18) !important;
 }
 
 /* Active */
-div.dt-buttons a.dt-button.modern-btn:active {
-
+div.dt-buttons .dt-button.modern-btn:active {
   transform: translateY(0);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.12) !important;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15) !important;
 }
-
 
 #golfTable th:nth-child(n+6),
 #golfTable td:nth-child(n+6) {
@@ -325,6 +328,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
