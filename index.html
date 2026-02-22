@@ -134,6 +134,30 @@ div.dt-buttons .dt-button.active {
   border-right: 1px solid #e6eaef;
 }
 
+/* Vertikale Linien auch im Tabellenkopf (inkl. FixedHeader & FixedColumns) */
+
+#golfTable thead th {
+  border-right: 1px solid #e6eaef !important;
+}
+
+#golfTable thead th:last-child {
+  border-right: none !important;
+}
+
+/* FixedHeader Kopie */
+table.dataTable.fixedHeader-floating th {
+  border-right: 1px solid #e6eaef !important;
+}
+
+table.dataTable.fixedHeader-floating th:last-child {
+  border-right: none !important;
+}
+
+/* FixedColumns linker Bereich */
+.dtfc-fixed-left thead th {
+  border-right: 1px solid #e6eaef !important;
+}  
+
 #golfTable th:last-child,
 #golfTable td:last-child {
   border-right: none;
@@ -396,3 +420,4 @@ document.addEventListener("DOMContentLoaded", initApp);
 
 </body>
 </html>
+
