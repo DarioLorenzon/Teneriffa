@@ -192,6 +192,28 @@ table.dataTable thead th {
   box-shadow: 3px 0 5px rgba(0,0,0,0.04);
 }
 
+/* =========================================
+   Header leicht abheben mit Schatten
+   ========================================= */
+
+/* Scroll-Header */
+.dataTables_scrollHead {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  z-index: 3;
+}
+
+/* Floating Header beim Scrollen */
+.fixedHeader-floating {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06) !important;
+  border-bottom: none !important;
+}
+
+/* Optional: leichte visuelle Trennung */
+.dataTables_scrollHead table {
+  border-bottom: 1px solid #e6eaef;
+}
+
+  
 </style>
 </head>
 
@@ -428,5 +450,6 @@ document.addEventListener("DOMContentLoaded", initApp);
 
 </body>
 </html>
+
 
 
