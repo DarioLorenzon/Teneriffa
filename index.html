@@ -102,6 +102,26 @@ table.dataTable thead th { background-color:#ffffff; }
 .dtfc-fixed-left tbody td { background-color:#ffffff !important; }
 
 .dtfc-fixed-left { box-shadow:3px 0 5px rgba(0,0,0,0.04); }
+
+/* Feine vertikale Linien für alle Spalten */
+#golfTable th,
+#golfTable td {
+  border-right: 1px solid #e6eaef;
+}
+
+/* Keine Linie ganz rechts */
+#golfTable th:last-child,
+#golfTable td:last-child {
+  border-right: none;
+}
+
+/* Optional: auch horizontale Linien etwas feiner */
+#golfTable tbody td {
+  border-top: 1px solid #eef2f6;
+}
+
+
+  
 </style>
 </head>
 
@@ -267,3 +287,4 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 </body>
 </html>
+
