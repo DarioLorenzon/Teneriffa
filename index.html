@@ -2,96 +2,173 @@
 <html lang="de-CH">
 <head>
 <meta charset="UTF-8">
+
+<!--
+  ==========================================================
+  PROJEKT: Golfplan Teneriffa 2026/2027
+  BESCHREIBUNG:
+  - CSV-Datei wird geladen (PapaParse)
+  - Darstellung mit DataTables
+  - Fixierte linke Spalten
+  - Fixierter Tabellenkopf
+  - Ort-Filter als Toggle-Chips
+  - Spalten ein-/ausblendbar (ColVis)
+  ==========================================================
+-->
+
 <title>Teneriffa 2026/2027</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- DataTables -->
+<!-- ==========================================================
+     EXTERNE BIBLIOTHEKEN
+     ========================================================== -->
+
+<!-- DataTables Basis -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+<!-- DataTables Erweiterungen -->
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.3.0/css/fixedColumns.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css">
 
+<!-- JavaScript Bibliotheken -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
 <script src="https://cdn.datatables.net/fixedcolumns/4.3.0/js/dataTables.fixedColumns.min.js"></script>
 <script src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
+
+<!-- CSV Parser -->
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <style>
-body { font-family: Arial, sans-serif; margin:15px; background:#f2f4f7; font-size:13px; }
+
+/* ==========================================================
+   GRUNDLAYOUT
+   ========================================================== */
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 15px;
+  background: #f2f4f7;
+  font-size: 13px;
+}
+
 h1 {
-  margin-bottom: 10px;
-  font-size: 18px;
-  font-weight: 500;
-  color: #2c3e50;
+  margin-bottom: 13px;
 }
 
-.toolbar { margin-bottom:15px; display:flex; flex-wrap:wrap; gap:8px; }
-
-.chip {
-  padding:6px 14px;
-  border-radius:20px;
-  font-size:12px;
-  cursor:pointer;
-  background:#e3e8ee;
-  color:#2c3e50;
-  transition:all .2s ease;
-}
-
-.chip:hover { background:#d5dde6; }
-
-.chip.active {
-  background:#2c3e50;
-  color:#fff;
-  box-shadow:0 2px 6px rgba(0,0,0,.15);
-}
+/* ==========================================================
+   BUTTON-BEREICH (DataTables Buttons)
+   ========================================================== */
 
 div.dt-buttons {
-  display:flex;
-  gap:8px;
-  margin-bottom:10px;
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;   /* Abstand zwischen Button und Tabelle */
 }
 
+/* ColVis Button optisch wie Chip */
 div.dt-buttons .dt-button {
-  padding:6px 14px !important;
-  border-radius:20px !important;
-  font-size:12px !important;
-  background:#e3e8ee !important;
-  color:#2c3e50 !important;
-  border:none !important;
+  padding: 6px 14px !important;
+  border-radius: 20px !important;
+  font-size: 12px !important;
+  background: #e3e8ee !important;
+  color: #2c3e50 !important;
+  border: none !important;
+  box-shadow: none !important;
+  transition: all 0.2s ease !important;
 }
 
-div.dt-buttons .dt-button:hover { background:#d5dde6 !important; }
+div.dt-buttons .dt-button:hover {
+  background: #d5dde6 !important;
+}
 
+div.dt-buttons .dt-button:active,
+div.dt-buttons .dt-button.active {
+  background: #2c3e50 !important;
+  color: #ffffff !important;
+}
+
+/* ==========================================================
+   ORT-FILTER (Toggle Chips)
+   ========================================================== */
+
+.toolbar {
+  margin-bottom: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  background: #e3e8ee;
+  color: #2c3e50;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.chip:hover {
+  background: #d5dde6;
+}
+
+.chip.active {
+  background: #2c3e50;
+  color: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+/* ==========================================================
+   TABELLEN-STYLING
+   ========================================================== */
+
+div.dataTables_wrapper {
+  overflow-x: auto;   /* horizontales Scrollen aktivieren */
+}
+
+table.dataTable tbody td {
+  padding: 4px 6px;
+  line-height: 1.1;
+  font-size: 12px;
+}
+
+/* Zentrierung */
 #golfTable tbody td,
-#golfTable thead th { text-align:center; }
+#golfTable thead th {
+  text-align: center;
+}
 
+/* Wochenende visuell hervorheben */
+table.dataTable tbody tr.weekend td:first-child {
+  font-weight: bold;
+}
+
+/* Spaltenbreite ab bestimmter Position fixieren */
 #golfTable th:nth-child(n+6),
 #golfTable td:nth-child(n+6) {
-  width:70px;
-  min-width:70px;
-  max-width:70px;
-  font-size:11px;
+  width: 70px;
+  min-width: 70px;
+  max-width: 70px;
+  padding: 3px 3px !important;
+  font-size: 11px;
 }
 
+/* Linien */
 #golfTable th,
-#golfTable td { border-right:1px solid #e6eaef; }
-
-#golfTable tbody td { border-top:1px solid #eef2f6; }
-
-.dtfc-fixed-left,
-.dtfc-fixed-left table,
-.dtfc-fixed-left thead th,
-.dtfc-fixed-left tbody td {
-  background:#fff !important;
+#golfTable td {
+  border-right: 1px solid #e6eaef;
 }
 
-/* =========================================
-   Fixierte Spalten – subtiler Schatten
-   ========================================= */
+#golfTable tbody td {
+  border-top: 1px solid #eef2f6;
+}
 
+/* Fixierte Spalten Hintergrund weiss halten */
 .dtfc-fixed-left,
 .dtfc-fixed-left table,
 .dtfc-fixed-left thead th,
@@ -99,33 +176,20 @@ div.dt-buttons .dt-button:hover { background:#d5dde6 !important; }
   background-color: #ffffff !important;
 }
 
-/* =========================================
-   Fixierte Spalten – subtiler Schatten
-   ========================================= */
-
-/* Hintergrund exakt gleich */
-.dtfc-fixed-left,
-.dtfc-fixed-left table,
-.dtfc-fixed-left thead th,
-.dtfc-fixed-left tbody td {
-  background-color: #ffffff !important;
-}
-
-/* Feiner Schatten nur rechts */
 .dtfc-fixed-left {
-  box-shadow: 4px 0 8px -4px rgba(0,0,0,0.08);
-  z-index: 2;
+  box-shadow: 3px 0 5px rgba(0,0,0,0.04);
 }
 
-  
-} 
-  
 </style>
 </head>
 
 <body>
 
 <h1>Teneriffa 2026/2027</h1>
+
+<!-- ==========================================================
+     ORT-FILTER (interaktive Chips)
+     ========================================================== -->
 
 <div class="toolbar">
   <div class="chip active" data-ort="">Alle</div>
@@ -137,6 +201,10 @@ div.dt-buttons .dt-button:hover { background:#d5dde6 !important; }
   <div class="chip" data-ort="RE">RE</div>
 </div>
 
+<!-- ==========================================================
+     TABELLE (wird dynamisch befüllt)
+     ========================================================== -->
+
 <table id="golfTable" class="display nowrap" style="width:100%">
   <thead></thead>
   <tbody></tbody>
@@ -144,122 +212,138 @@ div.dt-buttons .dt-button:hover { background:#d5dde6 !important; }
 
 <script>
 
-/* ========================================================== */
-/* KONFIGURATION                                              */
-/* ========================================================== */
+/* ==========================================================
+   1️⃣ KONFIGURATION
+   ========================================================== */
 
 const CONFIG = {
   csvUrl: "https://dariolorenzon.github.io/Teneriffa/golfplan.csv",
   delimiter: ";",
-  columns: { date: 0, ort: 1, nameStart: 7 }
-};
-
-const DOM = {
-  table: document.getElementById("golfTable"),
-  chips: document.querySelectorAll(".chip")
+  columns: {
+    date: 0,
+    ort: 1,
+    nameStart: 7
+  }
 };
 
 let tableInstance = null;
 
-/* ========================================================== */
-/* UTILITIES                                                  */
-/* ========================================================== */
 
+/* ==========================================================
+   2️⃣ UTILITY FUNKTIONEN
+   ========================================================== */
+
+/**
+ * Wandelt dd.mm.yyyy in Date-Objekt um
+ */
 function parseDate(dateStr) {
-  if (!dateStr || !dateStr.includes(".")) return null;
-  const [d,m,y] = dateStr.split(".");
-  return new Date(y, m-1, d);
+  const parts = dateStr.split(".");
+  return new Date(parts[2], parts[1] - 1, parts[0]);
 }
 
+/**
+ * Prüft ob Datum Wochenende ist
+ */
 function isWeekend(dateStr) {
-  const date = parseDate(dateStr);
-  if (!date) return false;
-  const day = date.getDay();
+  const day = parseDate(dateStr).getDay();
   return day === 0 || day === 6;
 }
 
+/**
+ * Erzeugt Tabellenkopf dynamisch
+ */
 function buildTableHeader(headers) {
+
   return `
     <tr>
       ${headers.map((header, index) => {
-        if (index >= CONFIG.columns.nameStart && header.includes(" ")) {
-          const [first, second] = header.split(" ");
-          return `<th>${first}<br>${second}</th>`;
+
+        if (index >= CONFIG.columns.nameStart) {
+          const parts = header.split(" ");
+          if (parts.length >= 2) {
+            return `<th>${parts[0]}<br>${parts[1]}</th>`;
+          }
         }
+
         return `<th>${header}</th>`;
+
       }).join("")}
     </tr>
   `;
 }
 
-/* ========================================================== */
-/* CHIP FILTER                                                */
-/* ========================================================== */
 
-function initChips() {
-  DOM.chips.forEach(chip => {
-    chip.addEventListener("click", () => {
+/* ==========================================================
+   3️⃣ CHIP FILTER LOGIK
+   ========================================================== */
 
-      DOM.chips.forEach(c => c.classList.remove("active"));
-      chip.classList.add("active");
+function activateChip(chipElement) {
 
-      if (tableInstance) {
-        tableInstance
-          .column(CONFIG.columns.ort)
-          .search(chip.dataset.ort)
-          .draw();
-      }
-    });
-  });
+  document.querySelectorAll('.chip')
+    .forEach(c => c.classList.remove('active'));
+
+  chipElement.classList.add('active');
+
+  const filterValue = chipElement.dataset.ort;
+
+  tableInstance
+    .column(CONFIG.columns.ort)
+    .search(filterValue)
+    .draw();
 }
 
-/* ========================================================== */
-/* CSV LADEN                                                  */
-/* ========================================================== */
+function initChips() {
 
-function loadCsv() {
+  document.querySelectorAll('.chip')
+    .forEach(chip => {
+
+      chip.addEventListener("click", () => {
+        activateChip(chip);
+      });
+
+    });
+}
+
+
+/* ==========================================================
+   4️⃣ DATEN LADEN
+   ========================================================== */
+
+function loadCsvData(callback) {
 
   Papa.parse(`${CONFIG.csvUrl}?v=${Date.now()}`, {
+
     download: true,
     delimiter: CONFIG.delimiter,
     skipEmptyLines: true,
 
     complete: function(results) {
 
-      if (!results.data || results.data.length === 0) {
-        console.error("CSV leer oder ungültig");
-        return;
-      }
+      const rows = results.data;
+      const headers = rows[0];
+      const data = rows.slice(1);
 
-      const headers = results.data[0];
-      const data = results.data.slice(1);
-
-      initDataTable(headers, data);
-      initChips();
-    },
-
-    error: function(err) {
-      console.error("Fehler beim Laden der CSV:", err);
+      callback(headers, data);
     }
+
   });
 }
 
-/* ========================================================== */
-/* DATATABLE                                                  */
-/* ========================================================== */
+
+/* ==========================================================
+   5️⃣ DATATABLE INITIALISIERUNG
+   ========================================================== */
 
 function initDataTable(headers, data) {
 
-  DOM.table.querySelector("thead").innerHTML =
+  document.querySelector('#golfTable thead').innerHTML =
     buildTableHeader(headers);
 
-  tableInstance = $(DOM.table).DataTable({
+  tableInstance = $('#golfTable').DataTable({
 
     dom: 'Brt',
     paging: false,
     searching: true,
-    autoWidth: false,
-    deferRender: true,
 
     buttons: [{
       extend: 'colvis',
@@ -276,14 +360,13 @@ function initDataTable(headers, data) {
 
     columnDefs: [
 
-      { targets: [4,5], visible: false },
+      { targets: [4, 5], visible: false },
 
       {
         targets: CONFIG.columns.date,
         render: function(data, type) {
           if (type === "sort") {
-            const date = parseDate(data);
-            return date ? date.getTime() : 0;
+            return parseDate(data).getTime();
           }
           return data;
         }
@@ -292,12 +375,18 @@ function initDataTable(headers, data) {
       { targets: "_all", className: "dt-center" },
 
       {
-        targets: index => index >= CONFIG.columns.nameStart,
+        targets: function(index) {
+          return index >= CONFIG.columns.nameStart;
+        },
         render: function(data, type) {
-          if (type === "display" && data && data.includes(" ")) {
-            const [first, second] = data.split(" ");
-            return `${first}<br>${second}`;
+
+          if (type === "display" && data) {
+            const parts = data.split(" ");
+            if (parts.length >= 2) {
+              return parts[0] + "<br>" + parts[1];
+            }
           }
+
           return data;
         }
       }
@@ -305,26 +394,32 @@ function initDataTable(headers, data) {
 
     createdRow: function(row, rowData) {
       if (isWeekend(rowData[CONFIG.columns.date])) {
-        row.classList.add("weekend");
+        $(row).addClass("weekend");
       }
     }
 
   });
 }
 
-/* ========================================================== */
-/* APP START                                                  */
-/* ========================================================== */
 
-document.addEventListener("DOMContentLoaded", loadCsv);
+/* ==========================================================
+   6️⃣ APP START
+   ========================================================== */
+
+function initApp() {
+
+  loadCsvData((headers, data) => {
+
+    initDataTable(headers, data);
+
+    initChips();
+
+  });
+}
+
+document.addEventListener("DOMContentLoaded", initApp);
 
 </script>
 
 </body>
 </html>
-
-
-
-
-
-
