@@ -2,26 +2,67 @@
 <html lang="de-CH">
 <head>
 <meta charset="UTF-8">
+
+<!-- ==========================================================
+   PROJEKT: Golfplan Teneriffa 2026/2027
+   BESCHREIBUNG:
+   - CSV wird extern geladen (PapaParse)
+   - Darstellung via DataTables
+   - Fixierte linke Spalten (Datum + Ort)
+   - Fixierter Tabellenkopf beim Scrollen
+   - Orts-Filter via Toggle-Chips
+   - Spalten ein-/ausblendbar
+   - Excel-Export (nur gefilterte & sichtbare Spalten)
+   ========================================================== -->
+
 <title>Teneriffa 2026/2027</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<!-- ==========================================================
+   EXTERNE BIBLIOTHEKEN
+   ========================================================== -->
+
+<!-- DataTables Basis -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+<!-- Erweiterungen -->
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.3.0/css/fixedColumns.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css">
 
+<!-- jQuery (Pflicht für DataTables) -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<!-- DataTables Kern -->
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<!-- Buttons Erweiterung -->
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+
+<!-- Excel-Export benötigt JSZip -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<!-- Fixierte Spalten + Fixierter Header -->
 <script src="https://cdn.datatables.net/fixedcolumns/4.3.0/js/dataTables.fixedColumns.min.js"></script>
 <script src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
+
+<!-- CSV Parser -->
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <style>
-body { font-family: Arial, sans-serif; margin:15px; background:#f2f4f7; font-size:13px; }
+
+/* ==========================================================
+   GRUNDLAYOUT
+   ========================================================== */
+
+body {
+  font-family: Arial, sans-serif;
+  margin:15px;
+  background:#f2f4f7;
+  font-size:13px;
+}
 
 h1 {
   margin-bottom:10px;
@@ -30,7 +71,16 @@ h1 {
   color:#2c3e50;
 }
 
-.toolbar { margin-bottom:15px; display:flex; flex-wrap:wrap; gap:8px; }
+/* ==========================================================
+   ORT-FILTER (Toggle-Chips)
+   ========================================================== */
+
+.toolbar {
+  margin-bottom:15px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
 
 .chip {
   padding:6px 14px;
@@ -50,13 +100,17 @@ h1 {
   box-shadow:0 2px 6px rgba(0,0,0,.15);
 }
 
+/* ==========================================================
+   DATA TABLE BUTTONS (ColVis + Excel)
+   ========================================================== */
+
 div.dt-buttons {
   display:flex;
   gap:8px;
   margin-bottom:10px;
 }
 
-/* Buttons wie Chips */
+/* Optisch wie Chips */
 div.dt-buttons .dt-button {
   padding:6px 14px !important;
   border-radius:20px !important;
@@ -66,27 +120,46 @@ div.dt-buttons .dt-button {
   border:none !important;
 }
 
-div.dt-buttons .dt-button:hover {
-  background:#d5dde6 !important;
-}
+/* ==========================================================
+   TABELLEN-STYLING
+   ========================================================== */
 
 #golfTable tbody td,
-#golfTable thead th { text-align:center; }
+#golfTable thead th {
+  text-align:center;
+}
 
+/* Vertikale Linien */
 #golfTable th,
-#golfTable td { border-right:1px solid #e6eaef; }
+#golfTable td {
+  border-right:1px solid #e6eaef;
+}
 
+/* Keine Linie ganz rechts */
 #golfTable th:last-child,
-#golfTable td:last-child { border-right:none; }
+#golfTable td:last-child {
+  border-right:none;
+}
 
-#golfTable tbody td { border-top:1px solid #eef2f6; }
+/* Horizontale Linien */
+#golfTable tbody td {
+  border-top:1px solid #eef2f6;
+}
 
+/* Hintergrund */
 table.dataTable,
 table.dataTable tbody td,
-table.dataTable thead th { background:#fff; }
+table.dataTable thead th {
+  background:#fff;
+}
 
-/* ===== KOMPAKTE NAMENSSPALTEN ===== */
-/* Spalte 6 (Index) = nth-child(7) */
+/* ==========================================================
+   KOMPAKTE NAMENSSPALTEN
+   ==========================================================
+   Spalte 6 (Index) = nth-child(7)
+   Alle Namensspalten gleich breit
+   ========================================================== */
+
 #golfTable th:nth-child(n+7),
 #golfTable td:nth-child(n+7) {
   min-width:50px;
@@ -95,45 +168,47 @@ table.dataTable thead th { background:#fff; }
   font-size:11px;
 }
 
+/* ==========================================================
+   FIXED COLUMNS STABILISIERUNG
+   ========================================================== */
+
 .dtfc-fixed-left,
 .dtfc-fixed-left table,
 .dtfc-fixed-left thead th,
-.dtfc-fixed-left tbody td { background:#fff !important; }
-
-.dtfc-fixed-left { box-shadow:3px 0 5px rgba(0,0,0,0.04); }
-
-/* =========================================
-   Vertikale Linien im Tabellen-Header
-   ========================================= */
-
-/* Sichtbarer Scroll-Header */
-.dataTables_scrollHead table th {
-  border-right: 1px solid #e6eaef !important;
+.dtfc-fixed-left tbody td {
+  background:#fff !important;
 }
 
-/* Floating Header (beim Scrollen) */
-.fixedHeader-floating th {
-  border-right: 1px solid #e6eaef !important;
+.dtfc-fixed-left {
+  box-shadow:3px 0 5px rgba(0,0,0,0.04);
 }
 
-/* Fixierte linke Header-Spalten */
+/* ==========================================================
+   VERTIKALE LINIEN IM HEADER
+   ========================================================== */
+
+.dataTables_scrollHead table th,
+.fixedHeader-floating th,
 .dtfc-fixed-left thead th {
-  border-right: 1px solid #e6eaef !important;
+  border-right:1px solid #e6eaef !important;
 }
 
-/* Letzte Spalte ohne Linie */
 .dataTables_scrollHead table th:last-child,
 .fixedHeader-floating th:last-child,
 .dtfc-fixed-left thead th:last-child {
-  border-right: none !important;
+  border-right:none !important;
 }
-  
+
 </style>
 </head>
 
 <body>
 
 <h1>Teneriffa 2026/2027</h1>
+
+<!-- ==========================================================
+   ORT-FILTER
+   ========================================================== -->
 
 <div class="toolbar">
   <div class="chip active" data-ort="">Alle</div>
@@ -145,6 +220,7 @@ table.dataTable thead th { background:#fff; }
   <div class="chip" data-ort="RE">RE</div>
 </div>
 
+<!-- Tabelle wird dynamisch befüllt -->
 <table id="golfTable" class="display nowrap" style="width:100%">
   <thead></thead>
   <tbody></tbody>
@@ -152,24 +228,39 @@ table.dataTable thead th { background:#fff; }
 
 <script>
 
+/* ==========================================================
+   KONFIGURATION
+   ========================================================== */
+
 const CONFIG = {
   csvUrl:"https://dariolorenzon.github.io/Teneriffa/golfplan.csv",
   delimiter:";",
-  columns:{ date:0, ort:1, nameStart:6 }
+  columns:{
+    date:0,       // Spalte 0 = Datum
+    ort:1,        // Spalte 1 = Ort
+    nameStart:6   // Ab Spalte 6 beginnen die Namensspalten
+  }
 };
 
 let tableInstance=null;
 
+/* ==========================================================
+   HILFSFUNKTIONEN
+   ========================================================== */
+
+/* Wandelt dd.mm.yyyy in ein Date-Objekt um */
 function parseDate(dateStr){
   const parts=dateStr.split(".");
   return new Date(parts[2],parts[1]-1,parts[0]);
 }
 
+/* Prüft, ob ein Datum auf ein Wochenende fällt */
 function isWeekend(dateStr){
   const day=parseDate(dateStr).getDay();
   return day===0||day===6;
 }
 
+/* Baut den Tabellenkopf dynamisch aus der CSV */
 function buildTableHeader(headers){
   return `<tr>${
     headers.map((h,i)=>{
@@ -182,17 +273,27 @@ function buildTableHeader(headers){
   }</tr>`;
 }
 
+/* ==========================================================
+   CHIP-FILTER INITIALISIERUNG
+   ========================================================== */
+
 function initChips(){
   document.querySelectorAll(".chip").forEach(chip=>{
     chip.addEventListener("click",()=>{
       document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
       chip.classList.add("active");
-      tableInstance.column(CONFIG.columns.ort)
+
+      tableInstance
+        .column(CONFIG.columns.ort)
         .search(chip.dataset.ort)
         .draw();
     });
   });
 }
+
+/* ==========================================================
+   CSV LADEN
+   ========================================================== */
 
 function loadCsvData(callback){
   Papa.parse(`${CONFIG.csvUrl}?v=${Date.now()}`,{
@@ -204,6 +305,10 @@ function loadCsvData(callback){
     }
   });
 }
+
+/* ==========================================================
+   DATATABLE INITIALISIERUNG
+   ========================================================== */
 
 function initDataTable(headers,data){
 
@@ -217,6 +322,7 @@ function initDataTable(headers,data){
     searching:true,
     autoWidth:false,
 
+    /* Buttons: ColVis + Excel */
     buttons:[
       {
         extend:'colvis',
@@ -250,6 +356,7 @@ function initDataTable(headers,data){
 
     columnDefs:[
       { targets:[4,5], visible:false },
+
       {
         targets:CONFIG.columns.date,
         render:function(data,type){
@@ -257,13 +364,16 @@ function initDataTable(headers,data){
           return data;
         }
       },
+
       { targets:"_all", className:"dt-center" },
+
       {
         targets:index=>index>=CONFIG.columns.nameStart,
         width:"50px"
       }
     ],
 
+    /* Wochenende visuell markieren */
     createdRow:function(row,rowData){
       if(isWeekend(rowData[CONFIG.columns.date])){
         row.classList.add("weekend");
@@ -272,6 +382,10 @@ function initDataTable(headers,data){
 
   });
 }
+
+/* ==========================================================
+   APP START
+   ========================================================== */
 
 document.addEventListener("DOMContentLoaded",()=>{
   loadCsvData((headers,data)=>{
@@ -284,4 +398,3 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 </body>
 </html>
-
