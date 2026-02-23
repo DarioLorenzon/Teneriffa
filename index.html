@@ -57,7 +57,6 @@ div.dt-buttons {
   margin-bottom:10px;
 }
 
-/* Buttons wie Chips */
 div.dt-buttons .dt-button {
   padding:6px 14px !important;
   border-radius:20px !important;
@@ -65,24 +64,11 @@ div.dt-buttons .dt-button {
   background:#e3e8ee !important;
   color:#2c3e50 !important;
   border:none !important;
-  box-shadow:none !important;
-  transition:all .2s ease !important;
 }
 
-div.dt-buttons .dt-button:hover {
-  background:#d5dde6 !important;
-}
-
+/* Tabellen Layout */
 #golfTable tbody td,
 #golfTable thead th { text-align:center; }
-
-#golfTable th:nth-child(n+6),
-#golfTable td:nth-child(n+6) {
-  width:70px;
-  min-width:70px;
-  max-width:70px;
-  font-size:11px;
-}
 
 #golfTable th,
 #golfTable td { border-right:1px solid #e6eaef; }
@@ -96,58 +82,24 @@ table.dataTable,
 table.dataTable tbody td,
 table.dataTable thead th { background-color:#ffffff; }
 
+/* ===== KOMPAKTE NAMENSSPALTEN ===== */
+
+/* CSS zählt ab 1 → Spalte 6 (Index) = nth-child(7) */
+#golfTable th:nth-child(n+7),
+#golfTable td:nth-child(n+7) {
+  min-width:50px;
+  max-width:50px;
+  width:50px;
+  font-size:11px;
+}
+
+/* FixedColumns stabil halten */
 .dtfc-fixed-left,
 .dtfc-fixed-left table,
 .dtfc-fixed-left thead th,
 .dtfc-fixed-left tbody td { background-color:#ffffff !important; }
 
 .dtfc-fixed-left { box-shadow:3px 0 5px rgba(0,0,0,0.04); }
-
-/* =========================================
-   Einheitliche vertikale Linien – überall
-   ========================================= */
-
-/* Body */
-#golfTable tbody td {
-  border-right: 1px solid #e6eaef;
-}
-
-/* Sichtbarer Scroll-Header */
-.dataTables_scrollHead table th {
-  border-right: 1px solid #e6eaef !important;
-}
-
-/* FixedHeader (wenn man scrollt) */
-.fixedHeader-floating th {
-  border-right: 1px solid #e6eaef !important;
-}
-
-/* FixedColumns links */
-.dtfc-fixed-left table th,
-.dtfc-fixed-left table td {
-  border-right: 1px solid #e6eaef !important;
-}
-
-/* Letzte Spalte ohne Linie */
-.dataTables_scrollHead table th:last-child,
-#golfTable tbody td:last-child,
-.fixedHeader-floating th:last-child {
-  border-right: none !important;
-}
-
-/* Keine Linie ganz rechts */
-#golfTable th:last-child,
-#golfTable td:last-child {
-  border-right: none;
-}
-
-/* Optional: auch horizontale Linien etwas feiner */
-#golfTable tbody td {
-  border-top: 1px solid #eef2f6;
-}
-
-
-  
 </style>
 </head>
 
@@ -175,7 +127,7 @@ table.dataTable thead th { background-color:#ffffff; }
 const CONFIG = {
   csvUrl: "https://dariolorenzon.github.io/Teneriffa/golfplan.csv",
   delimiter: ";",
-  columns: { date:0, ort:1, nameStart:7 }
+  columns: { date:0, ort:1, nameStart:6 }
 };
 
 let tableInstance = null;
@@ -237,32 +189,6 @@ function initDataTable(headers,data){
     searching:true,
     autoWidth:false,
 
-    buttons:[
-      {
-        extend:'colvis',
-        text:'Spalten ein/ausblenden'
-      },
-      {
-        extend:'excelHtml5',
-        text:'Excel Export',
-        filename:function(){
-          const today = new Date();
-          const y = today.getFullYear();
-          const m = String(today.getMonth()+1).padStart(2,"0");
-          const d = String(today.getDate()).padStart(2,"0");
-          return `Teneriffa_Export_${y}-${m}-${d}`;
-        },
-        title:null,
-        exportOptions:{
-          columns:':visible',
-          modifier:{
-            search:'applied',
-            order:'applied'
-          }
-        }
-      }
-    ],
-
     data:data,
     scrollX:true,
     scrollY:"70vh",
@@ -273,6 +199,7 @@ function initDataTable(headers,data){
 
     columnDefs:[
       { targets:[4,5], visible:false },
+
       {
         targets:CONFIG.columns.date,
         render:function(data,type){
@@ -280,16 +207,12 @@ function initDataTable(headers,data){
           return data;
         }
       },
+
       { targets:"_all", className:"dt-center" },
+
       {
         targets:index=>index>=CONFIG.columns.nameStart,
-        render:function(data,type){
-          if(type==="display" && data && data.includes(" ")){
-            const [a,b]=data.split(" ");
-            return `${a}<br>${b}`;
-          }
-          return data;
-        }
+        width:"50px"
       }
     ],
 
@@ -313,5 +236,3 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 </body>
 </html>
-
-
