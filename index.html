@@ -99,10 +99,25 @@ div.dt-buttons .dt-button:hover { background:#d5dde6 !important; }
   background-color: #ffffff !important;
 }
 
-.dtfc-fixed-left {
-  box-shadow: 4px 0 8px -4px rgba(0,0,0,0.08);
-  z-index: 2;
-}  
+/* =========================================
+   Fixierte Spalten – professioneller Shadow
+   ========================================= */
+
+.dtfc-fixed-left::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -6px;
+  width: 6px;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    rgba(0,0,0,0.10),
+    rgba(0,0,0,0.05),
+    rgba(0,0,0,0)
+  );
+} 
   
 </style>
 </head>
@@ -306,6 +321,7 @@ document.addEventListener("DOMContentLoaded", loadCsv);
 
 </body>
 </html>
+
 
 
 
