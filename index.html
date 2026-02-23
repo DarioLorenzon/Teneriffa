@@ -15,18 +15,14 @@
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.datatables.net/fixedcolumns/4.3.0/js/dataTables.fixedColumns.min.js"></script>
 <script src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <style>
-
-body {
-  font-family: Arial, sans-serif;
-  margin: 15px;
-  background: #f2f4f7;
-  font-size: 13px;
-}
+body { font-family: Arial, sans-serif; margin:15px; background:#f2f4f7; font-size:13px; }
 
 h1 {
   margin-bottom: 10px;
@@ -35,163 +31,77 @@ h1 {
   color: #2c3e50;
 }
 
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
-  gap: 8px;
+.toolbar { margin-bottom:15px; display:flex; flex-wrap:wrap; gap:8px; }
+
+.chip {
+  padding:6px 14px;
+  border-radius:20px;
+  font-size:12px;
+  cursor:pointer;
+  background:#e3e8ee;
+  color:#2c3e50;
+  transition:all .2s ease;
+}
+
+.chip:hover { background:#d5dde6; }
+
+.chip.active {
+  background:#2c3e50;
+  color:#fff;
+  box-shadow:0 2px 6px rgba(0,0,0,.15);
 }
 
 div.dt-buttons {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 10px;   /* Abstand zur Tabelle */
+  display:flex;
+  gap:8px;
+  margin-bottom:10px;
 }
 
-/* === Toggle Chips === */
-
-.toolbar {
-  margin-bottom: 15px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.chip {
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 12px;
-  cursor: pointer;
-  background: #e3e8ee;
-  color: #2c3e50;
-  transition: all 0.2s ease;
-  user-select: none;
-}
-
-.chip:hover {
-  background: #d5dde6;
-}
-
-.chip.active {
-  background: #2c3e50;
-  color: white;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-}
-
-div.dataTables_wrapper {
-  overflow-x: auto;
-}
-
-table.dataTable tbody td {
-  padding: 4px 6px;
-  line-height: 1.1;
-  font-size: 12px;
-}
-
-#golfTable tbody td,
-#golfTable thead th {
-  text-align: center;
-}
-
-table.dataTable tbody tr.weekend td:first-child {
-  font-weight: bold;
-}
-
-/* === Spalten ein/ausblenden === */
-/* === ColVis Button wie Chip stylen === */
-
+/* Buttons wie Chips */
 div.dt-buttons .dt-button {
-  padding: 6px 14px !important;
-  border-radius: 20px !important;
-  font-size: 12px !important;
-  background: #e3e8ee !important;
-  color: #2c3e50 !important;
-  border: none !important;
-  box-shadow: none !important;
-  transition: all 0.2s ease !important;
+  padding:6px 14px !important;
+  border-radius:20px !important;
+  font-size:12px !important;
+  background:#e3e8ee !important;
+  color:#2c3e50 !important;
+  border:none !important;
+  box-shadow:none !important;
+  transition:all .2s ease !important;
 }
 
 div.dt-buttons .dt-button:hover {
-  background: #d5dde6 !important;
+  background:#d5dde6 !important;
 }
 
-div.dt-buttons .dt-button:active,
-div.dt-buttons .dt-button.active {
-  background: #2c3e50 !important;
-  color: #ffffff !important;
-}
+#golfTable tbody td,
+#golfTable thead th { text-align:center; }
 
 #golfTable th:nth-child(n+6),
 #golfTable td:nth-child(n+6) {
-  width: 70px;
-  min-width: 70px;
-  max-width: 70px;
-  padding: 3px 3px !important;
-  font-size: 11px;
+  width:70px;
+  min-width:70px;
+  max-width:70px;
+  font-size:11px;
 }
 
 #golfTable th,
-#golfTable td {
-  border-right: 1px solid #e6eaef;
-}
+#golfTable td { border-right:1px solid #e6eaef; }
 
 #golfTable th:last-child,
-#golfTable td:last-child {
-  border-right: none;
-}
+#golfTable td:last-child { border-right:none; }
 
-#golfTable tbody td {
-  border-top: 1px solid #eef2f6;
-}
+#golfTable tbody td { border-top:1px solid #eef2f6; }
 
 table.dataTable,
 table.dataTable tbody td,
-table.dataTable thead th {
-  background-color: #ffffff;
-}
+table.dataTable thead th { background-color:#ffffff; }
 
 .dtfc-fixed-left,
 .dtfc-fixed-left table,
 .dtfc-fixed-left thead th,
-.dtfc-fixed-left tbody td {
-  background-color: #ffffff !important;
-}
+.dtfc-fixed-left tbody td { background-color:#ffffff !important; }
 
-.dtfc-fixed-left {
-  box-shadow: 3px 0 5px rgba(0,0,0,0.04);
-}
-
-
-/* =========================================
-   Vertikale Linien auch im Tabellenkopf
-   (ScrollHead + FixedHeader + FixedColumns)
-   ========================================= */
-
-/* Scroll-Header (sichtbarer Header) */
-.dataTables_scrollHead table th {
-  border-right: 1px solid #e6eaef !important;
-}
-
-/* Floating Header beim Scrollen */
-.fixedHeader-floating th {
-  border-right: 1px solid #e6eaef !important;
-}
-
-/* Fixierte linke Spalten im Header */
-.dtfc-fixed-left thead th {
-  border-right: 1px solid #e6eaef !important;
-}
-
-/* Letzte Spalte ohne Linie */
-.dataTables_scrollHead table th:last-child,
-.fixedHeader-floating th:last-child {
-  border-right: none !important;
-}
-
-
-  
+.dtfc-fixed-left { box-shadow:3px 0 5px rgba(0,0,0,0.04); }
 </style>
 </head>
 
@@ -199,7 +109,6 @@ table.dataTable thead th {
 
 <h1>Teneriffa 2026/2027</h1>
 
-<!-- Toggle Chips -->
 <div class="toolbar">
   <div class="chip active" data-ort="">Alle</div>
   <div class="chip" data-ort="AM">AM</div>
@@ -217,217 +126,144 @@ table.dataTable thead th {
 
 <script>
 
-/* ==========================================================
-    KONFIGURATION
-   ========================================================== */
-
 const CONFIG = {
   csvUrl: "https://dariolorenzon.github.io/Teneriffa/golfplan.csv",
   delimiter: ";",
-  columns: {
-    date: 0,
-    ort: 1,
-    nameStart: 7
-  }
+  columns: { date:0, ort:1, nameStart:7 }
 };
 
 let tableInstance = null;
 
-
-/* ==========================================================
-    UTILITY FUNKTIONEN
-   ========================================================== */
-
-/**
- * Wandelt dd.mm.yyyy in Date-Objekt um
- */
-function parseDate(dateStr) {
+function parseDate(dateStr){
   const parts = dateStr.split(".");
-  return new Date(parts[2], parts[1] - 1, parts[0]);
+  return new Date(parts[2], parts[1]-1, parts[0]);
 }
 
-/**
- * Prüft ob Datum Wochenende ist
- */
-function isWeekend(dateStr) {
+function isWeekend(dateStr){
   const day = parseDate(dateStr).getDay();
-  return day === 0 || day === 6;
+  return day===0 || day===6;
 }
 
-/**
- * Erzeugt Tabellenkopf dynamisch
- */
-function buildTableHeader(headers) {
-
-  return `
-    <tr>
-      ${headers.map((header, index) => {
-
-        if (index >= CONFIG.columns.nameStart) {
-          const parts = header.split(" ");
-          if (parts.length >= 2) {
-            return `<th>${parts[0]}<br>${parts[1]}</th>`;
-          }
-        }
-
-        return `<th>${header}</th>`;
-
-      }).join("")}
-    </tr>
-  `;
+function buildTableHeader(headers){
+  return `<tr>${
+    headers.map((h,i)=>{
+      if(i>=CONFIG.columns.nameStart && h.includes(" ")){
+        const [a,b]=h.split(" ");
+        return `<th>${a}<br>${b}</th>`;
+      }
+      return `<th>${h}</th>`;
+    }).join("")
+  }</tr>`;
 }
 
-
-/* ==========================================================
-    CHIP FILTER LOGIK
-   ========================================================== */
-
-function activateChip(chipElement) {
-
-  document.querySelectorAll('.chip')
-    .forEach(c => c.classList.remove('active'));
-
-  chipElement.classList.add('active');
-
-  const filterValue = chipElement.dataset.ort;
-
-  tableInstance
-    .column(CONFIG.columns.ort)
-    .search(filterValue)
-    .draw();
-}
-
-function initChips() {
-
-  document.querySelectorAll('.chip')
-    .forEach(chip => {
-
-      chip.addEventListener("click", () => {
-        activateChip(chip);
-      });
-
+function initChips(){
+  document.querySelectorAll(".chip").forEach(chip=>{
+    chip.addEventListener("click",()=>{
+      document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
+      chip.classList.add("active");
+      tableInstance.column(CONFIG.columns.ort)
+        .search(chip.dataset.ort)
+        .draw();
     });
-}
-
-
-/* ==========================================================
-    DATEN LADEN
-   ========================================================== */
-
-function loadCsvData(callback) {
-
-  Papa.parse(`${CONFIG.csvUrl}?v=${Date.now()}`, {
-
-    download: true,
-    delimiter: CONFIG.delimiter,
-    skipEmptyLines: true,
-
-    complete: function(results) {
-
-      const rows = results.data;
-      const headers = rows[0];
-      const data = rows.slice(1);
-
-      callback(headers, data);
-    }
-
   });
 }
 
+function loadCsvData(callback){
+  Papa.parse(`${CONFIG.csvUrl}?v=${Date.now()}`,{
+    download:true,
+    delimiter:CONFIG.delimiter,
+    skipEmptyLines:true,
+    complete:function(results){
+      callback(results.data[0], results.data.slice(1));
+    }
+  });
+}
 
-/* ==========================================================
-    DATATABLE INITIALISIERUNG
-   ========================================================== */
+function initDataTable(headers,data){
 
-function initDataTable(headers, data) {
-
-  document.querySelector('#golfTable thead').innerHTML =
+  document.querySelector("#golfTable thead").innerHTML =
     buildTableHeader(headers);
 
-  tableInstance = $('#golfTable').DataTable({
+  tableInstance = $("#golfTable").DataTable({
 
-    dom: 'Brt',
-    paging: false,
-    searching: true,
+    dom:'Brt',
+    paging:false,
+    searching:true,
+    autoWidth:false,
 
-    buttons: [{
-      extend: 'colvis',
-      text: 'Spalten ein/ausblenden'
-    }],
-
-    data: data,
-    scrollX: true,
-    scrollY: "70vh",
-    scrollCollapse: true,
-    order: [[CONFIG.columns.date, "asc"]],
-    fixedColumns: { leftColumns: 2 },
-    fixedHeader: true,
-
-    columnDefs: [
-
-      { targets: [4, 5], visible: false },
-
+    buttons:[
       {
-        targets: CONFIG.columns.date,
-        render: function(data, type) {
-          if (type === "sort") {
-            return parseDate(data).getTime();
+        extend:'colvis',
+        text:'Spalten ein/ausblenden'
+      },
+      {
+        extend:'excelHtml5',
+        text:'Excel Export',
+        filename:function(){
+          const today = new Date();
+          const y = today.getFullYear();
+          const m = String(today.getMonth()+1).padStart(2,"0");
+          const d = String(today.getDate()).padStart(2,"0");
+          return `Teneriffa_Export_${y}-${m}-${d}`;
+        },
+        title:null,
+        exportOptions:{
+          columns:':visible',
+          modifier:{
+            search:'applied',
+            order:'applied'
           }
+        }
+      }
+    ],
+
+    data:data,
+    scrollX:true,
+    scrollY:"70vh",
+    scrollCollapse:true,
+    order:[[CONFIG.columns.date,"asc"]],
+    fixedColumns:{ leftColumns:2 },
+    fixedHeader:true,
+
+    columnDefs:[
+      { targets:[4,5], visible:false },
+      {
+        targets:CONFIG.columns.date,
+        render:function(data,type){
+          if(type==="sort") return parseDate(data).getTime();
           return data;
         }
       },
-
-      { targets: "_all", className: "dt-center" },
-
+      { targets:"_all", className:"dt-center" },
       {
-        targets: function(index) {
-          return index >= CONFIG.columns.nameStart;
-        },
-        render: function(data, type) {
-
-          if (type === "display" && data) {
-            const parts = data.split(" ");
-            if (parts.length >= 2) {
-              return parts[0] + "<br>" + parts[1];
-            }
+        targets:index=>index>=CONFIG.columns.nameStart,
+        render:function(data,type){
+          if(type==="display" && data && data.includes(" ")){
+            const [a,b]=data.split(" ");
+            return `${a}<br>${b}`;
           }
-
           return data;
         }
       }
     ],
 
-    createdRow: function(row, rowData) {
-      if (isWeekend(rowData[CONFIG.columns.date])) {
-        $(row).addClass("weekend");
+    createdRow:function(row,rowData){
+      if(isWeekend(rowData[CONFIG.columns.date])){
+        row.classList.add("weekend");
       }
     }
 
   });
 }
 
-
-/* ==========================================================
-    APP START
-   ========================================================== */
-
-function initApp() {
-
-  loadCsvData((headers, data) => {
-
-    initDataTable(headers, data);
-
+document.addEventListener("DOMContentLoaded",()=>{
+  loadCsvData((headers,data)=>{
+    initDataTable(headers,data);
     initChips();
-
   });
-}
-
-document.addEventListener("DOMContentLoaded", initApp);
+});
 
 </script>
 
 </body>
 </html>
-
-
-
