@@ -87,6 +87,23 @@ div.dt-buttons .dt-button:hover { background:#d5dde6 !important; }
 .dtfc-fixed-left tbody td {
   background:#fff !important;
 }
+
+/* =========================================
+   Fixierte Spalten – subtiler Schatten
+   ========================================= */
+
+.dtfc-fixed-left,
+.dtfc-fixed-left table,
+.dtfc-fixed-left thead th,
+.dtfc-fixed-left tbody td {
+  background-color: #ffffff !important;
+}
+
+.dtfc-fixed-left {
+  box-shadow: 4px 0 8px -4px rgba(0,0,0,0.08);
+  z-index: 2;
+}  
+  
 </style>
 </head>
 
@@ -289,5 +306,6 @@ document.addEventListener("DOMContentLoaded", loadCsv);
 
 </body>
 </html>
+
 
 
