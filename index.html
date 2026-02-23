@@ -1,54 +1,25 @@
-// Version 1.0, 22.02.2026
-
 <!DOCTYPE html>
 <html lang="de-CH">
 <head>
 <meta charset="UTF-8">
-
-<!--
-  ==========================================================
-  PROJEKT: Golfplan Teneriffa 2026/2027
-  BESCHREIBUNG:
-  - CSV-Datei wird geladen (PapaParse)
-  - Darstellung mit DataTables
-  - Fixierte linke Spalten
-  - Fixierter Tabellenkopf
-  - Ort-Filter als Toggle-Chips
-  - Spalten ein-/ausblendbar (ColVis)
-  ==========================================================
--->
-
 <title>Teneriffa 2026/2027</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- ==========================================================
-     EXTERNE BIBLIOTHEKEN
-     ========================================================== -->
-
-<!-- DataTables Basis -->
+<!-- DataTables Styles -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-
-<!-- DataTables Erweiterungen -->
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.3.0/css/fixedColumns.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css">
 
-<!-- JavaScript Bibliotheken -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
 <script src="https://cdn.datatables.net/fixedcolumns/4.3.0/js/dataTables.fixedColumns.min.js"></script>
 <script src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
-
-<!-- CSV Parser -->
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <style>
-
-/* ==========================================================
-   GRUNDLAYOUT
-   ========================================================== */
 
 body {
   font-family: Arial, sans-serif;
@@ -61,41 +32,22 @@ h1 {
   margin-bottom: 13px;
 }
 
-/* ==========================================================
-   BUTTON-BEREICH (DataTables Buttons)
-   ========================================================== */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 
 div.dt-buttons {
   display: flex;
   gap: 8px;
-  margin-bottom: 10px;   /* Abstand zwischen Button und Tabelle */
+  margin-bottom: 10px;   /* Abstand zur Tabelle */
 }
 
-/* ColVis Button optisch wie Chip */
-div.dt-buttons .dt-button {
-  padding: 6px 14px !important;
-  border-radius: 20px !important;
-  font-size: 12px !important;
-  background: #e3e8ee !important;
-  color: #2c3e50 !important;
-  border: none !important;
-  box-shadow: none !important;
-  transition: all 0.2s ease !important;
-}
-
-div.dt-buttons .dt-button:hover {
-  background: #d5dde6 !important;
-}
-
-div.dt-buttons .dt-button:active,
-div.dt-buttons .dt-button.active {
-  background: #2c3e50 !important;
-  color: #ffffff !important;
-}
-
-/* ==========================================================
-   ORT-FILTER (Toggle Chips)
-   ========================================================== */
+/* === Toggle Chips === */
 
 .toolbar {
   margin-bottom: 15px;
@@ -125,12 +77,8 @@ div.dt-buttons .dt-button.active {
   box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
 
-/* ==========================================================
-   TABELLEN-STYLING
-   ========================================================== */
-
 div.dataTables_wrapper {
-  overflow-x: auto;   /* horizontales Scrollen aktivieren */
+  overflow-x: auto;
 }
 
 table.dataTable tbody td {
@@ -139,18 +87,39 @@ table.dataTable tbody td {
   font-size: 12px;
 }
 
-/* Zentrierung */
 #golfTable tbody td,
 #golfTable thead th {
   text-align: center;
 }
 
-/* Wochenende visuell hervorheben */
 table.dataTable tbody tr.weekend td:first-child {
   font-weight: bold;
 }
 
-/* Spaltenbreite ab bestimmter Position fixieren */
+/* === Spalten ein/ausblenden === */
+/* === ColVis Button wie Chip stylen === */
+
+div.dt-buttons .dt-button {
+  padding: 6px 14px !important;
+  border-radius: 20px !important;
+  font-size: 12px !important;
+  background: #e3e8ee !important;
+  color: #2c3e50 !important;
+  border: none !important;
+  box-shadow: none !important;
+  transition: all 0.2s ease !important;
+}
+
+div.dt-buttons .dt-button:hover {
+  background: #d5dde6 !important;
+}
+
+div.dt-buttons .dt-button:active,
+div.dt-buttons .dt-button.active {
+  background: #2c3e50 !important;
+  color: #ffffff !important;
+}
+
 #golfTable th:nth-child(n+6),
 #golfTable td:nth-child(n+6) {
   width: 70px;
@@ -160,17 +129,26 @@ table.dataTable tbody tr.weekend td:first-child {
   font-size: 11px;
 }
 
-/* Linien */
 #golfTable th,
 #golfTable td {
   border-right: 1px solid #e6eaef;
+}
+
+#golfTable th:last-child,
+#golfTable td:last-child {
+  border-right: none;
 }
 
 #golfTable tbody td {
   border-top: 1px solid #eef2f6;
 }
 
-/* Fixierte Spalten Hintergrund weiss halten */
+table.dataTable,
+table.dataTable tbody td,
+table.dataTable thead th {
+  background-color: #ffffff;
+}
+
 .dtfc-fixed-left,
 .dtfc-fixed-left table,
 .dtfc-fixed-left thead th,
@@ -189,10 +167,7 @@ table.dataTable tbody tr.weekend td:first-child {
 
 <h1>Teneriffa 2026/2027</h1>
 
-<!-- ==========================================================
-     ORT-FILTER (interaktive Chips)
-     ========================================================== -->
-
+<!-- Toggle Chips -->
 <div class="toolbar">
   <div class="chip active" data-ort="">Alle</div>
   <div class="chip" data-ort="AM">AM</div>
@@ -203,10 +178,6 @@ table.dataTable tbody tr.weekend td:first-child {
   <div class="chip" data-ort="RE">RE</div>
 </div>
 
-<!-- ==========================================================
-     TABELLE (wird dynamisch befüllt)
-     ========================================================== -->
-
 <table id="golfTable" class="display nowrap" style="width:100%">
   <thead></thead>
   <tbody></tbody>
@@ -215,7 +186,7 @@ table.dataTable tbody tr.weekend td:first-child {
 <script>
 
 /* ==========================================================
-   1️⃣ KONFIGURATION
+    KONFIGURATION
    ========================================================== */
 
 const CONFIG = {
@@ -232,7 +203,7 @@ let tableInstance = null;
 
 
 /* ==========================================================
-   2️⃣ UTILITY FUNKTIONEN
+    UTILITY FUNKTIONEN
    ========================================================== */
 
 /**
@@ -276,7 +247,7 @@ function buildTableHeader(headers) {
 
 
 /* ==========================================================
-   3️⃣ CHIP FILTER LOGIK
+    CHIP FILTER LOGIK
    ========================================================== */
 
 function activateChip(chipElement) {
@@ -308,7 +279,7 @@ function initChips() {
 
 
 /* ==========================================================
-   4️⃣ DATEN LADEN
+    DATEN LADEN
    ========================================================== */
 
 function loadCsvData(callback) {
@@ -333,7 +304,7 @@ function loadCsvData(callback) {
 
 
 /* ==========================================================
-   5️⃣ DATATABLE INITIALISIERUNG
+    DATATABLE INITIALISIERUNG
    ========================================================== */
 
 function initDataTable(headers, data) {
@@ -405,7 +376,7 @@ function initDataTable(headers, data) {
 
 
 /* ==========================================================
-   6️⃣ APP START
+    APP START
    ========================================================== */
 
 function initApp() {
