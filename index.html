@@ -101,6 +101,33 @@ table.dataTable thead th { background:#fff; }
 .dtfc-fixed-left tbody td { background:#fff !important; }
 
 .dtfc-fixed-left { box-shadow:3px 0 5px rgba(0,0,0,0.04); }
+
+/* =========================================
+   Vertikale Linien im Tabellen-Header
+   ========================================= */
+
+/* Sichtbarer Scroll-Header */
+.dataTables_scrollHead table th {
+  border-right: 1px solid #e6eaef !important;
+}
+
+/* Floating Header (beim Scrollen) */
+.fixedHeader-floating th {
+  border-right: 1px solid #e6eaef !important;
+}
+
+/* Fixierte linke Header-Spalten */
+.dtfc-fixed-left thead th {
+  border-right: 1px solid #e6eaef !important;
+}
+
+/* Letzte Spalte ohne Linie */
+.dataTables_scrollHead table th:last-child,
+.fixedHeader-floating th:last-child,
+.dtfc-fixed-left thead th:last-child {
+  border-right: none !important;
+}
+  
 </style>
 </head>
 
@@ -257,3 +284,4 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 </body>
 </html>
+
