@@ -5,7 +5,6 @@
 <title>Teneriffa 2026/2027</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- DataTables Styles -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.3.0/css/fixedColumns.dataTables.min.css">
@@ -25,10 +24,10 @@
 body { font-family: Arial, sans-serif; margin:15px; background:#f2f4f7; font-size:13px; }
 
 h1 {
-  margin-bottom: 10px;
-  font-size: 18px;
-  font-weight: 500;
-  color: #2c3e50;
+  margin-bottom:10px;
+  font-size:18px;
+  font-weight:500;
+  color:#2c3e50;
 }
 
 .toolbar { margin-bottom:15px; display:flex; flex-wrap:wrap; gap:8px; }
@@ -40,7 +39,7 @@ h1 {
   cursor:pointer;
   background:#e3e8ee;
   color:#2c3e50;
-  transition:all .2s ease;
+  transition:.2s;
 }
 
 .chip:hover { background:#d5dde6; }
@@ -57,6 +56,7 @@ div.dt-buttons {
   margin-bottom:10px;
 }
 
+/* Buttons wie Chips */
 div.dt-buttons .dt-button {
   padding:6px 14px !important;
   border-radius:20px !important;
@@ -66,7 +66,10 @@ div.dt-buttons .dt-button {
   border:none !important;
 }
 
-/* Tabellen Layout */
+div.dt-buttons .dt-button:hover {
+  background:#d5dde6 !important;
+}
+
 #golfTable tbody td,
 #golfTable thead th { text-align:center; }
 
@@ -80,11 +83,10 @@ div.dt-buttons .dt-button {
 
 table.dataTable,
 table.dataTable tbody td,
-table.dataTable thead th { background-color:#ffffff; }
+table.dataTable thead th { background:#fff; }
 
 /* ===== KOMPAKTE NAMENSSPALTEN ===== */
-
-/* CSS zählt ab 1 → Spalte 6 (Index) = nth-child(7) */
+/* Spalte 6 (Index) = nth-child(7) */
 #golfTable th:nth-child(n+7),
 #golfTable td:nth-child(n+7) {
   min-width:50px;
@@ -93,11 +95,10 @@ table.dataTable thead th { background-color:#ffffff; }
   font-size:11px;
 }
 
-/* FixedColumns stabil halten */
 .dtfc-fixed-left,
 .dtfc-fixed-left table,
 .dtfc-fixed-left thead th,
-.dtfc-fixed-left tbody td { background-color:#ffffff !important; }
+.dtfc-fixed-left tbody td { background:#fff !important; }
 
 .dtfc-fixed-left { box-shadow:3px 0 5px rgba(0,0,0,0.04); }
 </style>
@@ -125,21 +126,21 @@ table.dataTable thead th { background-color:#ffffff; }
 <script>
 
 const CONFIG = {
-  csvUrl: "https://dariolorenzon.github.io/Teneriffa/golfplan.csv",
-  delimiter: ";",
-  columns: { date:0, ort:1, nameStart:6 }
+  csvUrl:"https://dariolorenzon.github.io/Teneriffa/golfplan.csv",
+  delimiter:";",
+  columns:{ date:0, ort:1, nameStart:6 }
 };
 
-let tableInstance = null;
+let tableInstance=null;
 
 function parseDate(dateStr){
-  const parts = dateStr.split(".");
-  return new Date(parts[2], parts[1]-1, parts[0]);
+  const parts=dateStr.split(".");
+  return new Date(parts[2],parts[1]-1,parts[0]);
 }
 
 function isWeekend(dateStr){
-  const day = parseDate(dateStr).getDay();
-  return day===0 || day===6;
+  const day=parseDate(dateStr).getDay();
+  return day===0||day===6;
 }
 
 function buildTableHeader(headers){
@@ -172,22 +173,45 @@ function loadCsvData(callback){
     delimiter:CONFIG.delimiter,
     skipEmptyLines:true,
     complete:function(results){
-      callback(results.data[0], results.data.slice(1));
+      callback(results.data[0],results.data.slice(1));
     }
   });
 }
 
 function initDataTable(headers,data){
 
-  document.querySelector("#golfTable thead").innerHTML =
+  document.querySelector("#golfTable thead").innerHTML=
     buildTableHeader(headers);
 
-  tableInstance = $("#golfTable").DataTable({
+  tableInstance=$("#golfTable").DataTable({
 
     dom:'Brt',
     paging:false,
     searching:true,
     autoWidth:false,
+
+    buttons:[
+      {
+        extend:'colvis',
+        text:'Spalten ein/ausblenden'
+      },
+      {
+        extend:'excelHtml5',
+        text:'Excel Export',
+        filename:function(){
+          const t=new Date();
+          return `Teneriffa_Export_${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,"0")}-${String(t.getDate()).padStart(2,"0")}`;
+        },
+        title:null,
+        exportOptions:{
+          columns:':visible',
+          modifier:{
+            search:'applied',
+            order:'applied'
+          }
+        }
+      }
+    ],
 
     data:data,
     scrollX:true,
@@ -199,7 +223,6 @@ function initDataTable(headers,data){
 
     columnDefs:[
       { targets:[4,5], visible:false },
-
       {
         targets:CONFIG.columns.date,
         render:function(data,type){
@@ -207,9 +230,7 @@ function initDataTable(headers,data){
           return data;
         }
       },
-
       { targets:"_all", className:"dt-center" },
-
       {
         targets:index=>index>=CONFIG.columns.nameStart,
         width:"50px"
