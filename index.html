@@ -103,20 +103,24 @@ div.dt-buttons .dt-button:hover { background:#d5dde6 !important; }
    Fixierte Spalten – professioneller Shadow
    ========================================= */
 
-.dtfc-fixed-left::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: -6px;
-  width: 6px;
-  height: 100%;
-  pointer-events: none;
-  background: linear-gradient(
-    to right,
-    rgba(0,0,0,0.10),
-    rgba(0,0,0,0.05),
-    rgba(0,0,0,0)
-  );
+/* =========================================
+   Fixierte Spalten – sauberer Schatten
+   ========================================= */
+
+.dtfc-fixed-left {
+  background: transparent !important;
+}
+
+.dtfc-fixed-left .dtfc-fixed-left {
+  box-shadow: 4px 0 8px -4px rgba(0,0,0,0.12) !important;
+}
+
+/* Alternativ robuster (empfohlen) */
+.dtfc-fixed-left {
+  box-shadow: 4px 0 8px -4px rgba(0,0,0,0.12) !important;
+  position: relative;
+  z-index: 5;
+}
 } 
   
 </style>
@@ -321,6 +325,7 @@ document.addEventListener("DOMContentLoaded", loadCsv);
 
 </body>
 </html>
+
 
 
 
