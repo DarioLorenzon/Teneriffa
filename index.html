@@ -146,6 +146,11 @@ div.dt-buttons .dt-button {
   border-top:1px solid #eef2f6;
 }
 
+/* Wochenende fett beim Datum */
+.weekend td:first-child {
+  font-weight: bold;
+}   
+
 /* Hintergrund */
 table.dataTable,
 table.dataTable tbody td,
@@ -375,7 +380,8 @@ function initDataTable(headers,data){
 
     /* Wochenende visuell markieren */
     createdRow:function(row,rowData){
-      if(isWeekend(rowData[CONFIG.columns.date])){
+       const dateValue = rowData[CONFIG.columns.date];
+       if(isWeekend(rowData[CONFIG.columns.date])){
         row.classList.add("weekend");
       }
     }
@@ -398,3 +404,4 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 </body>
 </html>
+
