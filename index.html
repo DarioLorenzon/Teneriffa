@@ -193,7 +193,9 @@ function enableEditing(headers){
     rowData[col] = newVal;
 
     // 🔥 neu rendern
-    tableInstance.row(cell.index().row).data(rowData).draw(false);
+    const rowIndex = cell.index().row;
+
+    tableInstance.row(rowIndex).data(rowData).invalidate().draw(false);
 
     // 🔥 Firebase speichern
     db.ref("golfplan/"+key).update({
@@ -268,38 +270,20 @@ function initTable(headers,data){
     fixedHeader:true,
 
     columnDefs:[
-      {
-        targets:index=>index>=CONFIG.columns.nameStart,
-        width:"50px",
-        render:(data,type)=>{
-          if(type==="display"){
-            return data==="1" ? "✔️" : "";
-          }
-          return data;
+  {
+    targets:index=>index>=CONFIG.columns.nameStart,
+    width:"50px",
+    render:(data,type)=>{
+      if(type==="display"){
+        if(data==="1"){
+          return '<div style="background:#2ecc71;color:#fff;border-radius:6px;padding:2px;">✔</div>';
         }
+        return "";
       }
-    ],
-
-    createdRow:(row,rowData)=>{
-    
-      if(isWeekend(rowData[0])){
-        row.classList.add("weekend");
-      }
-    
-      // 🔥 Spieler-Zellen einfärben
-      $(row).find("td").each(function(i){
-        if(i >= CONFIG.columns.nameStart && rowData[i] === "1"){
-          $(this).css({
-            background:"#2ecc71",
-            color:"#fff",
-            fontWeight:"bold"
-          }).text("✔");
-        }
-      });
-    
+      return data;
     }
-
-  });
+  }
+]
 
   enableEditing(headers);
 }
