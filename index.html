@@ -140,24 +140,35 @@ function enableClick(headers){
   $('#golfTable tbody').on('click','td',function(){
 
     const cell = tableInstance.cell(this);
-    const rowData = tableInstance.row(this).data();
+    const rowIndex = cell.index().row;
     const col = cell.index().column;
 
     if(col < CONFIG.columns.nameStart) return;
 
-    const player=headers[col];
-    const key=createKey(rowData[0],rowData[1]);
+    const rowData = tableInstance.row(rowIndex).data();
 
+    const player = headers[col];
+    const key = createKey(rowData[0], rowData[1]);
+
+    // 👉 Toggle sauber
     const newVal = rowData[col] === "1" ? "" : "1";
-    rowData[col]=newVal;
 
-    tableInstance.row(cell.index().row).data(rowData).draw(false);
+    // 👉 WICHTIG: direkt im DataTable setzen (nicht nur im Array!)
+    cell.data(newVal);
 
+    // 👉 zusätzlich Array synchronisieren
+    rowData[col] = newVal;
+
+    // 👉 NEU: invalidate zwingt render neu (entscheidend!)
+    tableInstance.row(rowIndex).invalidate().draw(false);
+
+    // 👉 Firebase speichern
     db.ref("golfplan/"+key).update({
       [player]: newVal
     });
 
   });
+
 }
 
 /* ================= CHIPS ================= */
