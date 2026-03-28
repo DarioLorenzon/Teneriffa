@@ -184,6 +184,8 @@ function enableEditing(headers){
   // 🔥 WICHTIG: global listener wegen FixedColumns
   $(document).on('click', '.player-check', function(){
 
+    console.log("CLICK DETECTED");
+    
     const cellEl = $(this).closest('td');
     const rowEl = $(this).closest('tr');
 
