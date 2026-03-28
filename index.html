@@ -167,28 +167,35 @@ async function mergeFirebaseData(data, headers){
 
 function enableEditing(headers){
 
-  $(document).on('click','.player-check',function(){
+  $('#golfTable tbody').on('click','td',function(){
 
-    console.log("CLICK DETECTED");
-
-    const rowEl=$(this).closest('tr');
-    const cell=tableInstance.cell($(this).closest('td'));
-    const rowData=tableInstance.row(rowEl).data();
+    const cell = tableInstance.cell(this);
+    const rowData = tableInstance.row(this).data();
 
     if(!rowData) return;
 
-    const col=cell.index().column;
-    if(col<CONFIG.columns.nameStart) return;
+    const col = cell.index().column;
 
-    const player=headers[col];
-    const key=createSafeKey(rowData[0],rowData[1]);
+    // Nur Namensspalten
+    if(col < CONFIG.columns.nameStart) return;
+
+    console.log("CELL CLICKED");
+
+    const player = headers[col];
+    const key = createSafeKey(rowData[0], rowData[1]);
+
     if(!key) return;
 
-    const newVal=this.checked?"1":"";
+    // Toggle Wert
+    const current = rowData[col];
+    const newVal = current === "1" ? "" : "1";
 
-    rowData[col]=newVal;
-    tableInstance.row(rowEl).data(rowData).draw(false);
+    rowData[col] = newVal;
 
+    // 🔥 neu rendern
+    tableInstance.row(cell.index().row).data(rowData).draw(false);
+
+    // 🔥 Firebase speichern
     db.ref("golfplan/"+key).update({
       [player]: newVal
     });
@@ -266,7 +273,7 @@ function initTable(headers,data){
         width:"50px",
         render:(data,type)=>{
           if(type==="display"){
-            return `<input type="checkbox" class="player-check" ${data==="1"?"checked":""}>`;
+            return data==="1" ? "✔️" : "";
           }
           return data;
         }
