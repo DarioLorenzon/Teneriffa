@@ -56,6 +56,12 @@ div.dt-buttons .dt-button {
   transform: scale(1.2);
   cursor: pointer;
 }
+
+.player-active {
+  background: #2ecc71 !important;
+  color: transparent; /* versteckt Text komplett */
+}
+  
 </style>
 </head>
 
@@ -276,9 +282,7 @@ function initTable(headers,data){
 
           // 👉 Anzeige im UI
           if(type === "display"){
-          return data === "1"
-            ? '<div style="background:#2ecc71;color:white;border-radius:6px;padding:3px;font-size:12px;">✓</div>'
-            : "";
+            return "";
           }
         
           // 👉 Für Sort / Filter → IMMER roher Wert
@@ -288,10 +292,19 @@ function initTable(headers,data){
     ],
 
     createdRow:(row,rowData)=>{
-      if(isWeekend(rowData[0])) row.classList.add("weekend");
+    
+      if(isWeekend(rowData[0])){
+        row.classList.add("weekend");
+      }
+    
+      // 👉 Spieler-Zellen färben
+      $('td', row).each(function(i){
+        if(i >= CONFIG.columns.nameStart && rowData[i] === "1"){
+          $(this).addClass("player-active");
+        }
+      });
+    
     }
-
-  });
 
   // ✅ WICHTIG: ausserhalb!
   enableEditing(headers);
