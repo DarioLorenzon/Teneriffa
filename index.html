@@ -47,6 +47,11 @@ div.dt-buttons .dt-button {
 #golfTable td:nth-child(n+7) {
   width:50px; min-width:50px; max-width:50px; font-size:11px;
 }
+
+.player-check {
+  transform: scale(1.2);
+  cursor: pointer;
+}
 </style>
 </head>
 
@@ -69,7 +74,6 @@ div.dt-buttons .dt-button {
   <tbody></tbody>
 </table>
 
-<!-- 🔥 FIREBASE -->
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
@@ -90,7 +94,7 @@ const db = getDatabase(app);
 
 console.log("Firebase init ok");
 
-/* ========================================================== */
+/* ================= CONFIG ================= */
 
 const CONFIG = {
   csvUrl:"https://dariolorenzon.github.io/Teneriffa/golfplan.csv",
@@ -100,11 +104,11 @@ const CONFIG = {
 
 let tableInstance=null;
 
-/* ===== Helper ===== */
+/* ================= HELPERS ================= */
 
 function parseDate(d){
-  const p=d.split(".");
-  return new Date(p[2],p[1]-1,p[0]);
+  const [day,month,year]=d.split(".");
+  return new Date(year,month-1,day);
 }
 
 function isWeekend(d){
@@ -116,7 +120,6 @@ function createSafeKey(date, ort){
   const [d,m,y] = date.split(".");
   return `${y}-${m.padStart(2,"0")}-${d.padStart(2,"0")}_${ort}`;
 }
-
 
 function buildTableHeader(headers){
   return `<tr>${
@@ -130,40 +133,49 @@ function buildTableHeader(headers){
   }</tr>`;
 }
 
-/* ===== Firebase Merge ===== */
+/* ================= FIREBASE ================= */
 
 async function mergeFirebaseData(data, headers){
 
-  const snap = await get(ref(db,"golfplan"));
+  try{
+    const snap = await get(ref(db,"golfplan"));
+    console.log("Firebase Snapshot:", snap.val());
 
-  console.log("Firebase Snapshot:", snap.val());
-  
-  if(!snap.exists()) return data;
+    if(!snap.exists()) return data;
 
-  const fb = snap.val();
+    const fb = snap.val();
 
-  return data.map(row=>{
-    const key = createSafeKey(row[0], row[1]);
+    return data.map(row => {
 
-    if(fb[key]){
-      Object.entries(fb[key]).forEach(([player,val])=>{
-        headers.forEach((h,i)=>{
-          if(h===player) row[i]=val;
+      const key = createSafeKey(row[0], row[1]);
+
+      if(fb[key]){
+        Object.entries(fb[key]).forEach(([player,val])=>{
+          const colIndex = headers.indexOf(player);
+          if(colIndex !== -1){
+            row[colIndex] = val;
+          }
         });
-      });
-    }
-    return row;
-  });
+      }
+
+      return row;
+    });
+
+  } catch(err){
+    console.error("Firebase Merge Fehler:", err);
+    return data;
+  }
 }
 
-/* ===== Klick speichern ===== */
+/* ================= EDIT ================= */
 
 function enableEditing(headers){
 
   $('#golfTable tbody').on('change', '.player-check', function(){
 
+    const rowEl = $(this).closest('tr');
     const cell = tableInstance.cell($(this).closest('td'));
-    const rowData = tableInstance.row($(this).closest('tr')).data();
+    const rowData = tableInstance.row(rowEl).data();
     const col = cell.index().column;
 
     if(col < CONFIG.columns.nameStart) return;
@@ -173,11 +185,9 @@ function enableEditing(headers){
 
     const newVal = this.checked ? "1" : "";
 
-    // 🔥 WICHTIG: Array sauber updaten
     rowData[col] = newVal;
-    tableInstance.row($(this).closest('tr')).data(rowData).draw(false);
+    tableInstance.row(rowEl).data(rowData).draw(false);
 
-    // 🔥 Firebase speichern
     update(ref(db,"golfplan/"+key),{
       [player]: newVal
     });
@@ -186,7 +196,7 @@ function enableEditing(headers){
 
 }
 
-/* ===== Chips ===== */
+/* ================= UI ================= */
 
 function initChips(){
   document.querySelectorAll(".chip").forEach(chip=>{
@@ -200,31 +210,27 @@ function initChips(){
   });
 }
 
-/* ===== CSV ===== */
+/* ================= CSV ================= */
 
 function loadCsv(cb){
   Papa.parse(CONFIG.csvUrl+"?v="+Date.now(),{
     download:true,
     delimiter:CONFIG.delimiter,
     complete:r=>{
-
-    const headers = r.data[0];
+      const headers = r.data[0];
       let data = r.data.slice(1);
-    
-      // 🔥 FIX: alle Zeilen gleich lang machen
-      data = data.map(row => {
-        while(row.length < headers.length){
-          row.push("");
-        }
+
+      data = data.map(row=>{
+        while(row.length < headers.length) row.push("");
         return row;
       });
-    
-      cb(headers, data);
+
+      cb(headers,data);
     }
   });
 }
 
-/* ===== DataTable ===== */
+/* ================= TABLE ================= */
 
 function initTable(headers,data){
 
@@ -254,16 +260,13 @@ function initTable(headers,data){
     fixedHeader:true,
 
     columnDefs:[
-        {
-        targets: index => index >= CONFIG.columns.nameStart,
-        width: "50px",
-        render: function(data, type){
-      
-          if(type === "display"){
-            const checked = data === "1" ? "checked" : "";
-            return `<input type="checkbox" class="player-check" ${checked}>`;
+      {
+        targets:index=>index>=CONFIG.columns.nameStart,
+        width:"50px",
+        render:function(data,type){
+          if(type==="display"){
+            return `<input type="checkbox" class="player-check" ${data==="1"?"checked":""}>`;
           }
-      
           return data;
         }
       }
@@ -278,21 +281,15 @@ function initTable(headers,data){
   enableEditing(headers);
 }
 
-/* ===== START ===== */
+/* ================= START ================= */
 
 document.addEventListener("DOMContentLoaded",()=>{
 
   loadCsv(async (headers,data)=>{
 
-    let mergedData = data;
+    const merged = await mergeFirebaseData(data, headers);
 
-    try {
-      mergedData = await mergeFirebaseData(data, headers);
-    } catch (e) {
-      console.warn("Firebase nicht erreichbar – CSV wird trotzdem geladen");
-    }
-
-    initTable(headers, mergedData);
+    initTable(headers, merged);
     initChips();
 
   });
