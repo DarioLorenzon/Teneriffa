@@ -2,49 +2,208 @@
 <html lang="de-CH">
 <head>
 <meta charset="UTF-8">
+
+<!-- ==========================================================
+   PROJEKT: Golfplan Teneriffa 2026/2027
+   BESCHREIBUNG:
+   - CSV wird extern geladen (PapaParse)
+   - Darstellung via DataTables
+   - Fixierte linke Spalten (Datum + Ort)
+   - Fixierter Tabellenkopf beim Scrollen
+   - Orts-Filter via Toggle-Chips
+   - Spalten ein-/ausblendbar
+   - Excel-Export (nur gefilterte & sichtbare Spalten)
+   ========================================================== -->
+
 <title>Teneriffa 2026/2027</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- DataTables -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+<!-- ==========================================================
+   EXTERNE BIBLIOTHEKEN
+   ========================================================== -->
 
+<!-- DataTables Basis -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+<!-- Erweiterungen -->
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.3.0/css/fixedColumns.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css">
+
+<!-- jQuery (Pflicht für DataTables) -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<!-- DataTables Kern -->
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<!-- Buttons Erweiterung -->
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+
+<!-- Excel-Export benötigt JSZip -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
+<!-- Fixierte Spalten + Fixierter Header -->
+<script src="https://cdn.datatables.net/fixedcolumns/4.3.0/js/dataTables.fixedColumns.min.js"></script>
+<script src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
+
+<!-- CSV Parser -->
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-
 <style>
-body { font-family: Arial; margin:15px; background:#f2f4f7; font-size:13px; }
 
-.toolbar { margin-bottom:15px; display:flex; gap:8px; flex-wrap:wrap; }
-.chip { padding:6px 14px; border-radius:20px; background:#e3e8ee; cursor:pointer; }
-.chip.active { background:#2c3e50; color:#fff; }
+/* ==========================================================
+   GRUNDLAYOUT
+   ========================================================== */
 
-#golfTable th, #golfTable td { border-right:1px solid #e6eaef; text-align:center; }
-#golfTable th:last-child, #golfTable td:last-child { border-right:none; }
-#golfTable tbody td { border-top:1px solid #eef2f6; }
-
-.weekend td:first-child { font-weight:bold; }
-
-/* grüne aktive Zellen */
-.player-active {
-  background:#2ecc71 !important;
+body {
+  font-family: Arial, sans-serif;
+  margin:15px;
+  background:#f2f4f7;
+  font-size:13px;
 }
 
-/* Hover nice UX */
-.player-cell:hover {
-  background:#d5f5e3;
+h1 {
+  margin-bottom:10px;
+  font-size:18px;
+  font-weight:500;
+  color:#2c3e50;
+}
+
+/* ==========================================================
+   ORT-FILTER (Toggle-Chips)
+   ========================================================== */
+
+.toolbar {
+  margin-bottom:15px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.chip {
+  padding:6px 14px;
+  border-radius:20px;
+  font-size:12px;
   cursor:pointer;
+  background:#e3e8ee;
+  color:#2c3e50;
+  transition:.2s;
 }
+
+.chip:hover { background:#d5dde6; }
+
+.chip.active {
+  background:#2c3e50;
+  color:#fff;
+  box-shadow:0 2px 6px rgba(0,0,0,.15);
+}
+
+/* ==========================================================
+   DATA TABLE BUTTONS (ColVis + Excel)
+   ========================================================== */
+
+div.dt-buttons {
+  display:flex;
+  gap:8px;
+  margin-bottom:10px;
+}
+
+/* Optisch wie Chips */
+div.dt-buttons .dt-button {
+  padding:6px 14px !important;
+  border-radius:20px !important;
+  font-size:12px !important;
+  background:#e3e8ee !important;
+  color:#2c3e50 !important;
+  border:none !important;
+}
+
+/* ==========================================================
+   TABELLEN-STYLING
+   ========================================================== */
+
+#golfTable tbody td,
+#golfTable thead th {
+  text-align:center;
+}
+
+/* Vertikale Linien */
+#golfTable th,
+#golfTable td {
+  border-right:1px solid #e6eaef;
+}
+
+/* Keine Linie ganz rechts */
+#golfTable th:last-child,
+#golfTable td:last-child {
+  border-right:none;
+}
+
+/* Horizontale Linien */
+#golfTable tbody td {
+  border-top:1px solid #eef2f6;
+}
+
+/* Wochenende fett beim Datum */
+.weekend td:first-child {
+  font-weight: bold;
+}   
+
+/* Hintergrund */
+table.dataTable,
+table.dataTable tbody td,
+table.dataTable thead th {
+  background:#fff;
+}
+
+/* ==========================================================
+   KOMPAKTE NAMENSSPALTEN
+   ==========================================================
+   Spalte 6 (Index) = nth-child(7)
+   Alle Namensspalten gleich breit
+   ========================================================== */
+
+#golfTable th:nth-child(n+7),
+#golfTable td:nth-child(n+7) {
+  min-width:50px;
+  max-width:50px;
+  width:50px;
+  font-size:11px;
+}
+
+/* ==========================================================
+   FIXED COLUMNS STABILISIERUNG
+   ========================================================== */
+
+.dtfc-fixed-left,
+.dtfc-fixed-left table,
+.dtfc-fixed-left thead th,
+.dtfc-fixed-left tbody td {
+  background:#fff !important;
+}
+
+.dtfc-fixed-left {
+  box-shadow:3px 0 5px rgba(0,0,0,0.04);
+}
+
+/* ==========================================================
+   VERTIKALE LINIEN IM HEADER
+   ========================================================== */
+
+.dataTables_scrollHead table th,
+.fixedHeader-floating th,
+.dtfc-fixed-left thead th {
+  border-right:1px solid #e6eaef !important;
+}
+
+.dataTables_scrollHead table th:last-child,
+.fixedHeader-floating th:last-child,
+.dtfc-fixed-left thead th:last-child {
+  border-right:none !important;
+}
+
 </style>
 </head>
 
@@ -52,13 +211,21 @@ body { font-family: Arial; margin:15px; background:#f2f4f7; font-size:13px; }
 
 <h1>Teneriffa 2026/2027</h1>
 
+<!-- ==========================================================
+   ORT-FILTER
+   ========================================================== -->
+
 <div class="toolbar">
   <div class="chip active" data-ort="">Alle</div>
   <div class="chip" data-ort="AM">AM</div>
   <div class="chip" data-ort="DS">DS</div>
   <div class="chip" data-ort="AD">AD</div>
+  <div class="chip" data-ort="LA">LA</div>
+  <div class="chip" data-ort="BV">BV</div>
+  <div class="chip" data-ort="RE">RE</div>
 </div>
 
+<!-- Tabelle wird dynamisch befüllt -->
 <table id="golfTable" class="display nowrap" style="width:100%">
   <thead></thead>
   <tbody></tbody>
@@ -66,186 +233,175 @@ body { font-family: Arial; margin:15px; background:#f2f4f7; font-size:13px; }
 
 <script>
 
-/* ================= FIREBASE ================= */
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBl7...",
-  databaseURL: "https://tee-times-teneriffa-default-rtdb.europe-west1.firebasedatabase.app"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-/* ================= CONFIG ================= */
+/* ==========================================================
+   KONFIGURATION
+   ========================================================== */
 
 const CONFIG = {
   csvUrl:"https://dariolorenzon.github.io/Teneriffa/golfplan.csv",
   delimiter:";",
-  columns:{ date:0, ort:1, nameStart:6 }
+  columns:{
+    date:0,       // Spalte 0 = Datum
+    ort:1,        // Spalte 1 = Ort
+    nameStart:6   // Ab Spalte 6 beginnen die Namensspalten
+  }
 };
 
-let tableInstance;
+let tableInstance=null;
 
-/* ================= HELPERS ================= */
+/* ==========================================================
+   HILFSFUNKTIONEN
+   ========================================================== */
 
-function parseDate(d){
-  const [day,month,year]=d.split(".");
-  return new Date(year,month-1,day);
+/* Wandelt dd.mm.yyyy in ein Date-Objekt um */
+function parseDate(dateStr){
+  const parts=dateStr.split(".");
+  return new Date(parts[2],parts[1]-1,parts[0]);
 }
 
-function isWeekend(d){
-  const day=parseDate(d).getDay();
+/* Prüft, ob ein Datum auf ein Wochenende fällt */
+function isWeekend(dateStr){
+  const day=parseDate(dateStr).getDay();
   return day===0||day===6;
 }
 
-function createSafeKey(date, ort){
-  const [d,m,y]=date.split(".");
-  return `${y}-${m}-${d}_${ort}`;
-}
-
+/* Baut den Tabellenkopf dynamisch aus der CSV */
 function buildTableHeader(headers){
   return `<tr>${
-    headers.map(h=>`<th>${h}</th>`).join("")
+    headers.map((h,i)=>{
+      if(i>=CONFIG.columns.nameStart && h.includes(" ")){
+        const [a,b]=h.split(" ");
+        return `<th>${a}<br>${b}</th>`;
+      }
+      return `<th>${h}</th>`;
+    }).join("")
   }</tr>`;
 }
 
-/* ================= FIREBASE ================= */
+/* ==========================================================
+   CHIP-FILTER INITIALISIERUNG
+   ========================================================== */
 
-async function mergeFirebaseData(data, headers){
+function initChips(){
+  document.querySelectorAll(".chip").forEach(chip=>{
+    chip.addEventListener("click",()=>{
+      document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
+      chip.classList.add("active");
 
-  const snap = await db.ref("golfplan").once("value");
-
-  if(!snap.exists()) return data;
-
-  const fb = snap.val();
-
-  return data.map(row=>{
-    const key = createSafeKey(row[0],row[1]);
-
-    if(fb[key]){
-      Object.entries(fb[key]).forEach(([player,val])=>{
-        const idx = headers.indexOf(player);
-        if(idx!==-1) row[idx]=val;
-      });
-    }
-    return row;
-  });
-}
-
-/* ================= EDIT ================= */
-
-function enableEditing(headers){
-
-  $('#golfTable tbody').on('click','td',function(){
-
-    const cell = tableInstance.cell(this);
-    const rowData = tableInstance.row(this).data();
-    const col = cell.index().column;
-
-    if(col < CONFIG.columns.nameStart) return;
-
-    const player = headers[col];
-    const key = createSafeKey(rowData[0], rowData[1]);
-
-    const newVal = rowData[col] === "1" ? "" : "1";
-
-    rowData[col] = newVal;
-
-    // Update Tabelle
-    tableInstance.row(cell.index().row).data(rowData).draw(false);
-
-    // Farbe direkt setzen
-    if(newVal === "1"){
-      $(this).addClass("player-active");
-    } else {
-      $(this).removeClass("player-active");
-    }
-
-    // Firebase speichern
-    db.ref("golfplan/"+key).update({
-      [player]: newVal
+      tableInstance
+        .column(CONFIG.columns.ort)
+        .search(chip.dataset.ort)
+        .draw();
     });
-
   });
 }
 
-/* ================= CSV ================= */
+/* ==========================================================
+   CSV LADEN
+   ========================================================== */
 
-function loadCsv(cb){
-  Papa.parse(CONFIG.csvUrl,{
+function loadCsvData(callback){
+  Papa.parse(`${CONFIG.csvUrl}?v=${Date.now()}`,{
     download:true,
     delimiter:CONFIG.delimiter,
-    complete:r=>{
-      const headers=r.data[0];
-      let data=r.data.slice(1);
-
-      data=data.map(row=>{
-        while(row.length<headers.length) row.push("");
-        return row;
-      });
-
-      cb(headers,data);
+    skipEmptyLines:true,
+    complete:function(results){
+      callback(results.data[0],results.data.slice(1));
     }
   });
 }
 
-/* ================= TABLE ================= */
+/* ==========================================================
+   DATATABLE INITIALISIERUNG
+   ========================================================== */
 
-function initTable(headers,data){
+function initDataTable(headers,data){
 
-  document.querySelector("#golfTable thead").innerHTML =
+  document.querySelector("#golfTable thead").innerHTML=
     buildTableHeader(headers);
 
   tableInstance=$("#golfTable").DataTable({
 
-    data:data,
+    dom:'Brt',
     paging:false,
+    searching:true,
+    autoWidth:false,
 
-    columnDefs:[
+    /* Buttons: ColVis + Excel */
+    buttons:[
       {
-        targets:index=>index>=CONFIG.columns.nameStart,
-        className:"player-cell",
-        render:(data,type)=>{
-          if(type==="display") return "";
-          return data;
+        extend:'colvis',
+        text:'Spalten ein/ausblenden'
+      },
+      {
+        extend:'excelHtml5',
+        text:'Excel Export',
+        filename:function(){
+          const t=new Date();
+          return `Teneriffa_Export_${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,"0")}-${String(t.getDate()).padStart(2,"0")}`;
+        },
+        title:null,
+        exportOptions:{
+          columns:':visible',
+          modifier:{
+            search:'applied',
+            order:'applied'
+          }
         }
       }
     ],
 
-    createdRow:(row,rowData)=>{
+    data:data,
+    scrollX:true,
+    scrollY:"70vh",
+    scrollCollapse:true,
+    order:[[CONFIG.columns.date,"asc"]],
+    fixedColumns:{ leftColumns:2 },
+    fixedHeader:true,
 
-      if(isWeekend(rowData[0])){
+    columnDefs:[
+      { targets:[4,5], visible:false },
+
+      {
+        targets:CONFIG.columns.date,
+        render:function(data,type){
+          if(type==="sort") return parseDate(data).getTime();
+          return data;
+        }
+      },
+
+      { targets:"_all", className:"dt-center" },
+
+      {
+        targets:index=>index>=CONFIG.columns.nameStart,
+        width:"50px"
+      }
+    ],
+
+    /* Wochenende visuell markieren */
+    createdRow:function(row,rowData){
+       const dateValue = rowData[CONFIG.columns.date];
+       if(isWeekend(rowData[CONFIG.columns.date])){
         row.classList.add("weekend");
       }
-
-      $('td', row).each(function(i){
-        if(i >= CONFIG.columns.nameStart && rowData[i] === "1"){
-          $(this).addClass("player-active");
-        }
-      });
-
     }
 
   });
-
-  enableEditing(headers);
 }
 
-/* ================= START ================= */
+/* ==========================================================
+   APP START
+   ========================================================== */
 
 document.addEventListener("DOMContentLoaded",()=>{
-
-  loadCsv(async (headers,data)=>{
-
-    const merged=await mergeFirebaseData(data,headers);
-
-    initTable(headers,merged);
-
+  loadCsvData((headers,data)=>{
+    initDataTable(headers,data);
+    initChips();
   });
-
 });
 
 </script>
 
 </body>
 </html>
+
