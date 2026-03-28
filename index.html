@@ -281,7 +281,22 @@ function initTable(headers,data){
     ],
 
     createdRow:(row,rowData)=>{
-      if(isWeekend(rowData[0])) row.classList.add("weekend");
+    
+      if(isWeekend(rowData[0])){
+        row.classList.add("weekend");
+      }
+    
+      // 🔥 Spieler-Zellen einfärben
+      $(row).find("td").each(function(i){
+        if(i >= CONFIG.columns.nameStart && rowData[i] === "1"){
+          $(this).css({
+            background:"#2ecc71",
+            color:"#fff",
+            fontWeight:"bold"
+          }).text("✔");
+        }
+      });
+    
     }
 
   });
