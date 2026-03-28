@@ -272,14 +272,17 @@ function initTable(headers,data){
       {
         targets:index=>index>=CONFIG.columns.nameStart,
         width:"50px",
-        render:(data,type)=>{
-          if(type==="display"){
-            if(data==="1"){
-              return '<div style="background:#2ecc71;color:#fff;border-radius:6px;padding:2px;">✔</div>';
-            }
-            return "";
+        render: function(data, type){
+
+          // 👉 Anzeige im UI
+          if(type === "display"){
+          return data === "1"
+            ? '<div style="background:#2ecc71;color:white;border-radius:6px;padding:3px;font-size:12px;">✓</div>'
+            : "";
           }
-          return data;
+        
+          // 👉 Für Sort / Filter → IMMER roher Wert
+          return data === "1" ? "1" : "";
         }
       }
     ],
