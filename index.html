@@ -181,35 +181,38 @@ async function mergeFirebaseData(data, headers){
 
 function enableEditing(headers){
 
-  $('#golfTable tbody').on('change', '.player-check', function(){
+  // 🔥 WICHTIG: global listener wegen FixedColumns
+  $(document).on('click', '.player-check', function(){
 
+    const cellEl = $(this).closest('td');
     const rowEl = $(this).closest('tr');
-    const cell = tableInstance.cell($(this).closest('td'));
+
+    const cell = tableInstance.cell(cellEl);
     const rowData = tableInstance.row(rowEl).data();
+
+    if(!rowData) return;
+
     const col = cell.index().column;
 
     if(col < CONFIG.columns.nameStart) return;
 
     const player = headers[col];
-
-    // ✅ FIX: richtige Variable!
     const key = createSafeKey(rowData[0], rowData[1]);
+
     if(!key) return;
 
     const newVal = this.checked ? "1" : "";
 
-    // ✅ DataTable sauber updaten
+    // ✅ Update DataTable
     rowData[col] = newVal;
     tableInstance.row(rowEl).data(rowData).draw(false);
 
     // ✅ Firebase speichern
     update(ref(db,"golfplan/"+key),{
       [player]: newVal
-    }).then(()=>{
-      console.log("Saved:", key, player, newVal);
-    }).catch(err=>{
-      console.error("Firebase Write Fehler:", err);
-    });
+    })
+    .then(()=>console.log("Saved:", key, player, newVal))
+    .catch(err=>console.error("Firebase Error:", err));
 
   });
 
