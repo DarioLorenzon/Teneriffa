@@ -160,29 +160,29 @@ async function mergeFirebaseData(data, headers){
 
 function enableEditing(headers){
 
-$('#golfTable tbody').on('click','td',function(){
+  $('#golfTable tbody').on('change', '.player-check', function(){
 
-  const cell = tableInstance.cell(this);
-  const rowData = tableInstance.row(this).data();
-  const col = cell.index().column;
+    const cell = tableInstance.cell($(this).closest('td'));
+    const rowData = tableInstance.row($(this).closest('tr')).data();
+    const col = cell.index().column;
 
-  if(col < CONFIG.columns.nameStart) return;
+    if(col < CONFIG.columns.nameStart) return;
 
-  const player = headers[col];
-  const key = createSafeKey(rowData[0], rowData[1]);
+    const player = headers[col];
+    const key = createSafeKey(rowData[0], rowData[1]);
 
-  const newVal = rowData[col] === "1" ? "" : "1";
+    const newVal = this.checked ? "1" : "";
 
-  // ✅ sauber updaten
-  rowData[col] = newVal;
-  tableInstance.row(this).data(rowData).draw(false);
+    // 🔥 WICHTIG: Array sauber updaten
+    rowData[col] = newVal;
+    tableInstance.row($(this).closest('tr')).data(rowData).draw(false);
 
-  // ✅ Firebase speichern
-  update(ref(db,"golfplan/"+key),{
-    [player]: newVal
+    // 🔥 Firebase speichern
+    update(ref(db,"golfplan/"+key),{
+      [player]: newVal
+    });
+
   });
-
-});
 
 }
 
@@ -254,8 +254,19 @@ function initTable(headers,data){
     fixedHeader:true,
 
     columnDefs:[
-      { targets:[4,5], visible:false },
-      { targets:"_all", className:"dt-center" }
+        {
+        targets: index => index >= CONFIG.columns.nameStart,
+        width: "50px",
+        render: function(data, type){
+      
+          if(type === "display"){
+            const checked = data === "1" ? "checked" : "";
+            return `<input type="checkbox" class="player-check" ${checked}>`;
+          }
+      
+          return data;
+        }
+      }
     ],
 
     createdRow:(row,rowData)=>{
