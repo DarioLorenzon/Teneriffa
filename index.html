@@ -206,7 +206,21 @@ function loadCsv(cb){
   Papa.parse(CONFIG.csvUrl+"?v="+Date.now(),{
     download:true,
     delimiter:CONFIG.delimiter,
-    complete:r=>cb(r.data[0],r.data.slice(1))
+    complete:r=>{
+
+    const headers = r.data[0];
+      let data = r.data.slice(1);
+    
+      // 🔥 FIX: alle Zeilen gleich lang machen
+      data = data.map(row => {
+        while(row.length < headers.length){
+          row.push("");
+        }
+        return row;
+      });
+    
+      cb(headers, data);
+    }
   });
 }
 
