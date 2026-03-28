@@ -244,10 +244,10 @@ function loadCsv(cb){
 
 function initTable(headers,data){
 
-  document.querySelector("#golfTable thead").innerHTML=
+  document.querySelector("#golfTable thead").innerHTML =
     buildTableHeader(headers);
 
-  tableInstance=$("#golfTable").DataTable({
+  tableInstance = $("#golfTable").DataTable({
 
     dom:'Brt',
     paging:false,
@@ -266,25 +266,31 @@ function initTable(headers,data){
     data:data,
     scrollX:true,
     scrollY:"70vh",
-    // fixedColumns:{ leftColumns:2 },
     fixedHeader:true,
 
     columnDefs:[
-  {
-    targets:index=>index>=CONFIG.columns.nameStart,
-    width:"50px",
-    render:(data,type)=>{
-      if(type==="display"){
-        if(data==="1"){
-          return '<div style="background:#2ecc71;color:#fff;border-radius:6px;padding:2px;">✔</div>';
+      {
+        targets:index=>index>=CONFIG.columns.nameStart,
+        width:"50px",
+        render:(data,type)=>{
+          if(type==="display"){
+            if(data==="1"){
+              return '<div style="background:#2ecc71;color:#fff;border-radius:6px;padding:2px;">✔</div>';
+            }
+            return "";
+          }
+          return data;
         }
-        return "";
       }
-      return data;
-    }
-  }
-],
+    ],
 
+    createdRow:(row,rowData)=>{
+      if(isWeekend(rowData[0])) row.classList.add("weekend");
+    }
+
+  });
+
+  // ✅ WICHTIG: ausserhalb!
   enableEditing(headers);
 }
 
