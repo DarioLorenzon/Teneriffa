@@ -222,16 +222,20 @@ function initTable(headers,data){
     fixedHeader:true,
 
     columnDefs:[
-      {
-        targets:index=>index>=CONFIG.columns.nameStart,
-        render:(data,type)=>{
-          if(type==="display"){
-            return data==="1" ? '<span class="player-x">x</span>' : "";
-          }
-          return data;
-        }
+  {
+    targets:index=>index>=CONFIG.columns.nameStart,
+    render:(data,type)=>{
+      
+      // 👉 Anzeige IMMER kontrollieren
+      if(type === "display"){
+        return data === "1" ? "x" : "";
       }
-    ],
+
+      // 👉 Für Sortierung/Filter weiterhin Rohwert
+      return data === "1" ? "1" : "";
+    }
+  }
+],
 
     createdRow:(row,rowData)=>{
       if(isWeekend(rowData[0])) row.classList.add("weekend");
