@@ -21,6 +21,10 @@
 <script src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
+<!-- 🔥 Firebase (COMPAT VERSION = wichtig!) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
 <style>
 body { font-family: Arial; margin:15px; background:#f2f4f7; font-size:13px; }
 h1 { font-size:18px; margin-bottom:10px; }
@@ -74,10 +78,9 @@ div.dt-buttons .dt-button {
   <tbody></tbody>
 </table>
 
-<script type="module">
+<script>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+/* ================= FIREBASE ================= */
 
 const firebaseConfig = {
   apiKey: "AIzaSyBl7CqMFZZq0oZkhs8Zzibq_6wiSikAcXE",
@@ -89,8 +92,8 @@ const firebaseConfig = {
   appId: "1:103629641735:web:f61ea2f1618bd08364b2a2"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
 console.log("Firebase init ok");
 
@@ -117,16 +120,9 @@ function isWeekend(d){
 }
 
 function createSafeKey(date, ort){
-
-  if(!date || !date.includes(".")) return null;
-
-  const parts = date.split(".");
-  if(parts.length !== 3) return null;
-
-  const [d,m,y] = parts;
-
-  if(!d || !m || !y) return null;
-
+  if(!date) return null;
+  const [d,m,y]=date.split(".");
+  if(!d||!m||!y) return null;
   return `${y}-${m.padStart(2,"0")}-${d.padStart(2,"0")}_${ort}`;
 }
 
@@ -142,79 +138,60 @@ function buildTableHeader(headers){
   }</tr>`;
 }
 
-/* ================= FIREBASE ================= */
+/* ================= FIREBASE MERGE ================= */
 
 async function mergeFirebaseData(data, headers){
 
-  try{
-    const snap = await get(ref(db,"golfplan"));
-    console.log("Firebase Snapshot:", snap.val());
+  const snap = await db.ref("golfplan").once("value");
+  console.log("Firebase Snapshot:", snap.val());
 
-    if(!snap.exists()) return data;
+  if(!snap.exists()) return data;
 
-    const fb = snap.val();
+  const fb = snap.val();
 
-    return data.map(row => {
+  return data.map(row=>{
+    const key = createSafeKey(row[0],row[1]);
+    if(!key) return row;
 
-      const key = createSafeKey(row[0], row[1]);
-      if(!key) return row;
-
-      if(fb[key]){
-        Object.entries(fb[key]).forEach(([player,val])=>{
-          const colIndex = headers.indexOf(player);
-          if(colIndex !== -1){
-            row[colIndex] = val;
-          }
-        });
-      }
-
-      return row;
-    });
-
-  } catch(err){
-    console.error("Firebase Merge Fehler:", err);
-    return data;
-  }
+    if(fb[key]){
+      Object.entries(fb[key]).forEach(([player,val])=>{
+        const idx = headers.indexOf(player);
+        if(idx!==-1) row[idx]=val;
+      });
+    }
+    return row;
+  });
 }
 
 /* ================= EDIT ================= */
 
 function enableEditing(headers){
 
-  // 🔥 WICHTIG: global listener wegen FixedColumns
-  $(document).on('click', '.player-check', function(){
+  $(document).on('click','.player-check',function(){
 
     console.log("CLICK DETECTED");
-    
-    const cellEl = $(this).closest('td');
-    const rowEl = $(this).closest('tr');
 
-    const cell = tableInstance.cell(cellEl);
-    const rowData = tableInstance.row(rowEl).data();
+    const rowEl=$(this).closest('tr');
+    const cell=tableInstance.cell($(this).closest('td'));
+    const rowData=tableInstance.row(rowEl).data();
 
     if(!rowData) return;
 
-    const col = cell.index().column;
+    const col=cell.index().column;
+    if(col<CONFIG.columns.nameStart) return;
 
-    if(col < CONFIG.columns.nameStart) return;
-
-    const player = headers[col];
-    const key = createSafeKey(rowData[0], rowData[1]);
-
+    const player=headers[col];
+    const key=createSafeKey(rowData[0],rowData[1]);
     if(!key) return;
 
-    const newVal = this.checked ? "1" : "";
+    const newVal=this.checked?"1":"";
 
-    // ✅ Update DataTable
-    rowData[col] = newVal;
+    rowData[col]=newVal;
     tableInstance.row(rowEl).data(rowData).draw(false);
 
-    // ✅ Firebase speichern
-    update(ref(db,"golfplan/"+key),{
+    db.ref("golfplan/"+key).update({
       [player]: newVal
-    })
-    .then(()=>console.log("Saved:", key, player, newVal))
-    .catch(err=>console.error("Firebase Error:", err));
+    });
 
   });
 
@@ -241,11 +218,11 @@ function loadCsv(cb){
     download:true,
     delimiter:CONFIG.delimiter,
     complete:r=>{
-      const headers = r.data[0];
-      let data = r.data.slice(1);
+      const headers=r.data[0];
+      let data=r.data.slice(1);
 
-      data = data.map(row=>{
-        while(row.length < headers.length) row.push("");
+      data=data.map(row=>{
+        while(row.length<headers.length) row.push("");
         return row;
       });
 
@@ -258,7 +235,7 @@ function loadCsv(cb){
 
 function initTable(headers,data){
 
-  document.querySelector("#golfTable thead").innerHTML =
+  document.querySelector("#golfTable thead").innerHTML=
     buildTableHeader(headers);
 
   tableInstance=$("#golfTable").DataTable({
@@ -287,7 +264,7 @@ function initTable(headers,data){
       {
         targets:index=>index>=CONFIG.columns.nameStart,
         width:"50px",
-        render:function(data,type){
+        render:(data,type)=>{
           if(type==="display"){
             return `<input type="checkbox" class="player-check" ${data==="1"?"checked":""}>`;
           }
@@ -311,9 +288,9 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   loadCsv(async (headers,data)=>{
 
-    const merged = await mergeFirebaseData(data, headers);
+    const merged=await mergeFirebaseData(data,headers);
 
-    initTable(headers, merged);
+    initTable(headers,merged);
     initChips();
 
   });
