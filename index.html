@@ -191,16 +191,24 @@ function enableEditing(headers){
     if(col < CONFIG.columns.nameStart) return;
 
     const player = headers[col];
-    const key = createSafeKey(row[0], row[1]);
-    if(!key) return row;
+
+    // ✅ FIX: richtige Variable!
+    const key = createSafeKey(rowData[0], rowData[1]);
+    if(!key) return;
 
     const newVal = this.checked ? "1" : "";
 
+    // ✅ DataTable sauber updaten
     rowData[col] = newVal;
     tableInstance.row(rowEl).data(rowData).draw(false);
 
+    // ✅ Firebase speichern
     update(ref(db,"golfplan/"+key),{
       [player]: newVal
+    }).then(()=>{
+      console.log("Saved:", key, player, newVal);
+    }).catch(err=>{
+      console.error("Firebase Write Fehler:", err);
     });
 
   });
