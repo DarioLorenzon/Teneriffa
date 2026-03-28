@@ -160,26 +160,29 @@ async function mergeFirebaseData(data, headers){
 
 function enableEditing(headers){
 
-  $('#golfTable tbody').on('click','td',function(){
+$('#golfTable tbody').on('click','td',function(){
 
-    const cell = tableInstance.cell(this);
-    const row = tableInstance.row(this).data();
-    const col = cell.index().column;
+  const cell = tableInstance.cell(this);
+  const rowData = tableInstance.row(this).data();
+  const col = cell.index().column;
 
-    if(col < CONFIG.columns.nameStart) return;
+  if(col < CONFIG.columns.nameStart) return;
 
-    const player = headers[col];
-    const key = createSafeKey(row[0], row[1]);
+  const player = headers[col];
+  const key = createSafeKey(rowData[0], rowData[1]);
 
-    const newVal = cell.data()==="1" ? "" : "1";
+  const newVal = rowData[col] === "1" ? "" : "1";
 
-    cell.data(newVal).draw();
+  // ✅ sauber updaten
+  rowData[col] = newVal;
+  tableInstance.row(this).data(rowData).draw(false);
 
-    update(ref(db,"golfplan/"+key),{
-      [player]: newVal
-    });
-
+  // ✅ Firebase speichern
+  update(ref(db,"golfplan/"+key),{
+    [player]: newVal
   });
+
+});
 
 }
 
