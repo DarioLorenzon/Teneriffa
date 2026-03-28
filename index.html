@@ -78,6 +78,7 @@ import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasej
 const firebaseConfig = {
   apiKey: "AIzaSyBl7CqMFZZq0oZkhs8Zzibq_6wiSikAcXE",
   authDomain: "tee-times-teneriffa.firebaseapp.com",
+  databaseURL: "https://tee-times-teneriffa-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "tee-times-teneriffa",
   storageBucket: "tee-times-teneriffa.firebasestorage.app",
   messagingSenderId: "103629641735",
@@ -86,6 +87,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+
+console.log("Firebase init ok");
 
 /* ========================================================== */
 
@@ -126,6 +129,9 @@ function buildTableHeader(headers){
 async function mergeFirebaseData(data, headers){
 
   const snap = await get(ref(db,"golfplan"));
+
+  console.log("Firebase Snapshot:", snap.val());
+  
   if(!snap.exists()) return data;
 
   const fb = snap.val();
@@ -244,9 +250,15 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   loadCsv(async (headers,data)=>{
 
-    const merged = await mergeFirebaseData(data, headers);
+    let mergedData = data;
 
-    initTable(headers, merged);
+    try {
+      mergedData = await mergeFirebaseData(data, headers);
+    } catch (e) {
+      console.warn("Firebase nicht erreichbar – CSV wird trotzdem geladen");
+    }
+
+    initTable(headers, mergedData);
     initChips();
 
   });
