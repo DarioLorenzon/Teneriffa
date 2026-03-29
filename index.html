@@ -126,7 +126,9 @@ async function mergeFirebase(data, headers){
     if(fb[key]){
       Object.entries(fb[key]).forEach(([player,val])=>{
         const i=headers.indexOf(player);
-        if(i!==-1) row[i]=val;
+          if(i!==-1){
+            row[i] = (val === "1") ? "x" : val;
+          }
       });
     }
     return row;
@@ -150,7 +152,7 @@ function enableClick(headers){
     const player = headers[col];
     const key = createKey(rowData[0], rowData[1]);
 
-    const newVal = rowData[col] === "1" ? "" : "1";
+    const newVal = rowData[col] === "1" ? "" : "x";
 
     // 👉 1. Daten im Array aktualisieren
     rowData[col] = newVal;
@@ -243,7 +245,7 @@ function initTable(headers,data){
       }
 
       // 👉 Für Sortierung/Filter weiterhin Rohwert
-      return data === "1" ? "1" : "";
+      return data === "1" ? "x" : "";
     }
   }
 ],
