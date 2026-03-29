@@ -269,15 +269,16 @@ function initTable(headers,data){
       // 👉 Spieler-Spalten (FIX)
       {
         targets: index => index >= CONFIG.columns.nameStart,
-        render: function(data, type){
-    
-          if(type === "display"){
-            return data === "x"
-              ? '<span style="color:#27ae60;font-weight:bold;">x</span>'
-              : "";
+        createdCell: function(td, cellData){
+      
+          if(cellData === "x"){
+            td.innerHTML = "x";
+            td.style.color = "#27ae60";   // ✅ direkt auf Zelle
+            td.style.fontWeight = "bold";
+          } else {
+            td.innerHTML = "";
+            td.style.color = "";
           }
-    
-          return data === "x" ? "x" : "";
         }
       }
     
