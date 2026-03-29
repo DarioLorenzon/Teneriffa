@@ -52,10 +52,8 @@ h1 { margin-bottom:10px; }
 }
 
 /* X Anzeige */
-#golfTable td.has-x,
-#golfTable tbody td.has-x,
-table.dataTable tbody td.has-x {
-  color: red !important;
+.player-x {
+  color: #27ae60 !important;
   font-weight: bold;
 }
   
@@ -267,20 +265,20 @@ function initTable(headers,data){
       },
     
       // 👉 Spieler-Spalten (FIX)
-      {
-        targets: index => index >= CONFIG.columns.nameStart,
-        createdCell: function(td, cellData){
-      
-          if(cellData === "x"){
-            td.innerHTML = "x";
-            td.style.setProperty("color", "#27ae60", "important");
-            td.style.fontWeight = "bold";
-          } else {
-            td.innerHTML = "";
-            td.style.color = "";
+
+         {
+          targets: index => index >= CONFIG.columns.nameStart,
+          render: function(data, type){
+        
+            if(type === "display"){
+              return data === "x"
+                ? '<span class="player-x">x</span>'
+                : "";
+            }
+        
+            return data === "x" ? "x" : "";
           }
-        }
-      }
+        } 
     
     ],
 
