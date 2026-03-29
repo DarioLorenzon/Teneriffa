@@ -251,42 +251,37 @@ function initTable(headers,data){
 
     
 
-columnDefs:[
-
-  // 👉 Datum korrekt sortieren
-  {
-    targets: CONFIG.columns.date,
-    render: function(data, type){
-
-      if(type === "sort"){
-        return parseDate(data).getTime(); // 🔥 entscheidend
-      }
-
-      return data;
-    }
-  },
-
-  // 👉 Spieler-Spalten
+    columnDefs:[
+    
+      // 👉 Datum korrekt sortieren
+      {
+        targets: CONFIG.columns.date,
+        render: function(data, type){
+    
+          if(type === "sort"){
+            return parseDate(data).getTime();
+          }
+    
+          return data;
+        }
+      },
+    
+      // 👉 Spieler-Spalten (FIX)
       {
         targets: index => index >= CONFIG.columns.nameStart,
+        render: function(data, type){
     
-      {
-      targets: index => index >= CONFIG.columns.nameStart,
-      render: function(data, type){
+          if(type === "display"){
+            return data === "x"
+              ? '<span style="color:#27ae60;font-weight:bold;">x</span>'
+              : "";
+          }
     
-        if(type === "display"){
-          return data === "x"
-            ? '<span style="color:#27ae60;font-weight:bold;">x</span>'
-            : "";
+          return data === "x" ? "x" : "";
         }
-    
-        return data === "x" ? "x" : "";
       }
-    }
     
-  }
-
-],
+    ],
 
     createdRow:(row,rowData)=>{
       if(isWeekend(rowData[0])) row.classList.add("weekend");
