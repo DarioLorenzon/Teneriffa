@@ -52,13 +52,9 @@ h1 { margin-bottom:10px; }
 }
 
 /* X Anzeige */
-.player-x {
-  font-weight:bold;
-  color:#27ae60; /* sanftes Grün */
-}
-
-#golfTable td .player-x {
+#golfTable td.has-x {
   color: #27ae60 !important;
+  font-weight: bold;
 }
   
 </style>
@@ -271,11 +267,15 @@ columnDefs:[
   // 👉 Spieler-Spalten
   {
     targets: index => index >= CONFIG.columns.nameStart,
-    render: function(data, type){
-      if(type === "display"){
-        return data === "x" ? '<span class="player-x">x</span>' : "";
+    createdCell: function(td, cellData){
+  
+      if(cellData === "x"){
+        td.classList.add("has-x");
+        td.innerHTML = "x";
+      } else {
+        td.classList.remove("has-x");
+        td.innerHTML = "";
       }
-      return data === "x" ? "x" : "";
     }
   }
 
