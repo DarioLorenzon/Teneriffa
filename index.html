@@ -96,7 +96,12 @@ let tableInstance;
 
 /* ================= HELPERS ================= */
 
-function parseDate(d){
+  function parseDate(dateStr){
+  const [day,month,year] = dateStr.split(".");
+  return new Date(year, month-1, day);
+}
+  
+  function parseDate(d){
   const [day,month,year]=d.split(".");
   return new Date(year,month-1,day);
 }
@@ -229,23 +234,40 @@ function initTable(headers,data){
     data:data,
     scrollX:true,
     scrollY:"70vh",
+
+    order: [[CONFIG.columns.date, "asc"]],
+    
     fixedColumns:{ leftColumns:2 },
     fixedHeader:true,
 
-    columnDefs:[
+    
+
+columnDefs:[
+
+  // 👉 Datum korrekt sortieren
   {
-    targets:index=>index>=CONFIG.columns.nameStart,
-    render:(data,type)=>{
-      
-      // 👉 Anzeige IMMER kontrollieren
-      if(type === "display"){
-        return data === "1" ? "x" : "";
+    targets: CONFIG.columns.date,
+    render: function(data, type){
+
+      if(type === "sort"){
+        return parseDate(data).getTime(); // 🔥 entscheidend
       }
 
-      // 👉 Für Sortierung/Filter weiterhin Rohwert
-      return data === "1" ? "x" : "";
+      return data;
+    }
+  },
+
+  // 👉 Spieler-Spalten
+  {
+    targets: index => index >= CONFIG.columns.nameStart,
+    render: function(data, type){
+      if(type === "display"){
+        return data === "x" ? "x" : "";
+      }
+      return data === "x" ? "x" : "";
     }
   }
+
 ],
 
     createdRow:(row,rowData)=>{
