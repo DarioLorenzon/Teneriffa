@@ -54,7 +54,8 @@ h1 { margin-bottom:10px; }
 /* X Anzeige */
 .player-x {
   font-weight:bold;
-  color:#2c3e50;
+  color:#27ae60; /* sanftes Grün */
+  // color:#2c3e50; /* schwarz */
 }
 </style>
 </head>
@@ -268,7 +269,7 @@ columnDefs:[
     targets: index => index >= CONFIG.columns.nameStart,
     render: function(data, type){
       if(type === "display"){
-        return data === "x" ? "x" : "";
+        return data === "x" ? '<span class="player-x">x</span>' : "";
       }
       return data === "x" ? "x" : "";
     }
