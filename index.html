@@ -143,7 +143,9 @@ function enableClick(headers){
 
     const cell = tableInstance.cell(this);
     const rowIndex = cell.index().row;
-    const col = cell.index().column;
+
+    // 👉 KORREKTER Spaltenindex (wichtig!)
+    const col = tableInstance.column(this).index();
 
     if(col < CONFIG.columns.nameStart) return;
 
@@ -152,17 +154,13 @@ function enableClick(headers){
     const player = headers[col];
     const key = createKey(rowData[0], rowData[1]);
 
-    const newVal = rowData[col] === "1" ? "" : "x";
+    // 👉 Toggle mit "x"
+    const newVal = rowData[col] === "x" ? "" : "x";
 
-    // 👉 1. Daten im Array aktualisieren
     rowData[col] = newVal;
 
-    // 👉 2. DataTable NICHT komplett redrawen (verhindert "1")
-    tableInstance.row(rowIndex).data(rowData);
-
-    // 👉 3. Zelle DIREKT im DOM überschreiben (entscheidend!)
-    const td = tableInstance.cell(this).node();
-    td.innerHTML = newVal === "1" ? "x" : "";
+    // 👉 DataTable sauber aktualisieren
+    tableInstance.row(rowIndex).data(rowData).invalidate().draw(false);
 
     // 👉 Firebase speichern
     db.ref("golfplan/"+key).update({
