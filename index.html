@@ -273,7 +273,7 @@ function initTable(headers,data){
       
           if(cellData === "x"){
             td.innerHTML = "x";
-            td.style.color = "#27ae60";   // ✅ direkt auf Zelle
+            td.style.setProperty("color", "#27ae60", "important");
             td.style.fontWeight = "bold";
           } else {
             td.innerHTML = "";
