@@ -267,18 +267,23 @@ columnDefs:[
   },
 
   // 👉 Spieler-Spalten
-  {
-    targets: index => index >= CONFIG.columns.nameStart,
-    createdCell: function(td, cellData){
-  
-      if(cellData === "x"){
-        td.classList.add("has-x");
-        td.innerHTML = "x";
-      } else {
-        td.classList.remove("has-x");
-        td.innerHTML = "";
+      {
+        targets: index => index >= CONFIG.columns.nameStart,
+    
+      {
+      targets: index => index >= CONFIG.columns.nameStart,
+      render: function(data, type){
+    
+        if(type === "display"){
+          return data === "x"
+            ? '<span style="color:#27ae60;font-weight:bold;">x</span>'
+            : "";
+        }
+    
+        return data === "x" ? "x" : "";
       }
     }
+    
   }
 
 ],
