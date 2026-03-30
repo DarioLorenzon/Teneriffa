@@ -28,28 +28,120 @@
 
 <style>
 
-/* BASIC */
-body { font-family: Arial; margin:15px; background:#f2f4f7; font-size:13px; }
-h1 { margin-bottom:10px; }
+/* ================= BASIC ================= */
 
-/* CHIPS */
-.toolbar { margin-bottom:15px; display:flex; flex-wrap:wrap; gap:8px; }
-.chip { padding:6px 14px; border-radius:20px; background:#e3e8ee; cursor:pointer; }
-.chip.active { background:#2c3e50; color:#fff; }
+body {
+  font-family: Arial;
+  margin:15px;
+  background:#f2f4f7;
+  font-size:13px;
+}
 
-/* TABLE */
-#golfTable th, #golfTable td { border-right:2px solid #d0d7de; text-align:center; }
-#golfTable th:last-child, #golfTable td:last-child { border-right:none; }
-#golfTable thead th { text-align:center !important; vertical-align:middle; }
-.weekend td:first-child { font-weight:bold; }
+/* Header */
+.header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:15px;
+}
 
+.header h1 {
+  margin:0;
+  font-size:20px;
+  font-weight:600;
+}
+
+.subtitle {
+  font-size:12px;
+  color:#7f8c8d;
+}
+
+/* ================= CHIPS ================= */
+
+.toolbar {
+  margin-bottom:15px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.chip {
+  padding:6px 14px;
+  border-radius:20px;
+  background:#e3e8ee;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.chip:hover {
+  background:#d5dde6;
+}
+
+.chip.active {
+  background:#2c3e50;
+  color:#fff;
+  box-shadow:0 2px 6px rgba(0,0,0,0.15);
+}
+
+/* ================= TABLE ================= */
+
+#golfTable th, #golfTable td {
+  border-right:2px solid #d0d7de;
+  text-align:center;
+}
+
+#golfTable th:last-child,
+#golfTable td:last-child {
+  border-right:none;
+}
+
+#golfTable thead th {
+  text-align:center !important;
+  vertical-align:middle;
+}
+
+/* Hover Effekt */
+#golfTable tbody td:hover {
+  background:#f0f7ff;
+  cursor:pointer;
+  transition:0.15s;
+}
+
+#golfTable tbody td:active {
+  background:#d6eaff;
+}
+
+/* Wochenende */
+.weekend td {
+  background:#fafafa;
+}
+
+.weekend td:first-child {
+  font-weight:bold;
+}
+
+/* kompakte Spieler-Spalten */
 #golfTable th:nth-child(n+7),
-#golfTable td:nth-child(n+7) { width:50px; font-size:11px; }
+#golfTable td:nth-child(n+7) {
+  width:50px;
+  font-size:11px;
+}
 
-/* X */
-.player-x { color:#27ae60 !important; font-weight:bold !important; }
+/* X als Badge */
+.player-x {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:#27ae60;
+  color:white !important;
+  font-size:12px;
+  font-weight:bold;
+}
 
-/* ================= POPUP / MODAL ================= */
+/* ================= POPUP ================= */
 
 .popup-overlay {
   position: fixed;
@@ -63,7 +155,6 @@ h1 { margin-bottom:10px; }
   animation: fadeIn 0.2s ease;
 }
 
-/* Mobile: Bottom Sheet */
 .popup {
   background:#fff;
   width:100%;
@@ -72,30 +163,26 @@ h1 { margin-bottom:10px; }
   padding:20px;
   overflow-y:auto;
   animation: slideUp 0.25s ease;
+  box-shadow:0 -5px 30px rgba(0,0,0,0.15);
 }
 
-/* Desktop: zentriert */
 @media (min-width:768px){
-  .popup-overlay {
-    align-items:center;
-  }
+  .popup-overlay { align-items:center; }
 
   .popup {
     width:350px;
-    max-height:80%;
     border-radius:12px;
   }
 }
 
 .popup h3 {
-  margin-top:0;
-  margin-bottom:10px;
+  margin:0 0 10px 0;
+  font-size:18px;
+  font-weight:600;
   text-align:center;
 }
 
-.popup ul {
-  padding-left:20px;
-}
+.popup ul { padding-left:20px; }
 
 .popup-close {
   position:absolute;
@@ -105,7 +192,6 @@ h1 { margin-bottom:10px; }
   cursor:pointer;
 }
 
-/* Animationen */
 @keyframes slideUp {
   from { transform:translateY(100%); }
   to { transform:translateY(0); }
@@ -116,16 +202,20 @@ h1 { margin-bottom:10px; }
   to { opacity:1; }
 }
 
-.popup h3 { margin-top:0; }
-.popup-close { margin-top:10px; cursor:pointer; color:#3498db; }
-
 </style>
 </head>
 
 <body>
 
-<h1>Teneriffa 2026/2027</h1>
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <h1>Teneriffa 2026/2027</h1>
+    <div class="subtitle">Golfplanung & Verfügbarkeit</div>
+  </div>
+</div>
 
+<!-- FILTER -->
 <div class="toolbar">
   <div class="chip active" data-ort="">Alle</div>
   <div class="chip" data-ort="AM">AM</div>
@@ -195,7 +285,6 @@ function showPlayersPopup(date, rowData, headers){
   popup.innerHTML = `
     <div class="popup-close">✕</div>
     <h3>${date}</h3>
-
     ${
       players.length
         ? `<ul>${players.map(p => `<li>${p}</li>`).join("")}</ul>`
@@ -206,12 +295,8 @@ function showPlayersPopup(date, rowData, headers){
   overlay.appendChild(popup);
   document.body.appendChild(overlay);
 
-  // Schliessen (Overlay oder X)
   overlay.addEventListener("click", (e)=>{
-    if(
-      e.target === overlay ||
-      e.target.classList.contains("popup-close")
-    ){
+    if(e.target === overlay || e.target.classList.contains("popup-close")){
       overlay.remove();
     }
   });
@@ -264,7 +349,6 @@ function enableClick(headers){
     const col = tableInstance.column(this).index();
     const rowData = tableInstance.row(rowIndex).data();
 
-    // 👉 Datum klick → Popup
     if(col === CONFIG.columns.date){
       showPlayersPopup(rowData[0], rowData, headers);
       return;
