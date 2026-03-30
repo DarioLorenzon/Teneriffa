@@ -85,6 +85,18 @@ body {
 
 /* ================= TABLE ================= */
 
+.dataTables_scrollBody {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scroll-snap-type: x proximity;
+}
+
+#golfTable th,
+#golfTable td {
+  scroll-snap-align: center;
+}
+
+  
 #golfTable th, #golfTable td {
   border-right:2px solid #d0d7de;
   text-align:center;
