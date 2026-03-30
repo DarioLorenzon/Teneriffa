@@ -102,13 +102,13 @@ body {
 
 /* Hover Effekt */
 #golfTable tbody td:hover {
-  background:#f0f7ff;
+  background:#d6eaff; /* deutlich kräftiger */
   cursor:pointer;
   transition:0.15s;
 }
 
 #golfTable tbody td:active {
-  background:#d6eaff;
+  background:#bcdfff; /* Klick-Feedback */
 }
 
 /* Wochenende */
@@ -422,9 +422,9 @@ function initTable(headers,data){
         targets:index=>index>=CONFIG.columns.nameStart,
         render:(data,type)=>{
           if(type==="display"){
-            return data==="x"
-              ? '<span class="player-x">x</span>'
-              : "";
+          return data==="x"
+            ? '<span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#27ae60;color:#fff;font-size:12px;font-weight:bold;">x</span>'
+            : "";
           }
           return data==="x"?"x":"";
         }
