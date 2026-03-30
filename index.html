@@ -7,16 +7,11 @@
 
 <!-- LIBRARIES -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.3.0/css/fixedColumns.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css">
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.datatables.net/fixedcolumns/4.3.0/js/dataTables.fixedColumns.min.js"></script>
 <script src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
 
@@ -115,7 +110,7 @@ const CONFIG = {
 
 /* FIREBASE */
 firebase.initializeApp({
-  apiKey: "AIza...",
+  apiKey: "AIzaSyBl7CqMFZZq0oZkhs8Zzibq_6wiSikAcXE",
   databaseURL: "https://tee-times-teneriffa-default-rtdb.europe-west1.firebasedatabase.app"
 });
 const db = firebase.database();
@@ -163,10 +158,47 @@ function showPlayersPopup(date, rowData, headers){
   document.body.appendChild(overlay);
 }
 
-/* CLICK (NEU) */
+/* CSV */
+function loadCsv(cb){
+  Papa.parse(CONFIG.csvUrl,{
+    download:true,
+    delimiter:CONFIG.delimiter,
+    complete:r=>{
+      const headers=r.data[0];
+      let data=r.data.slice(1);
+      data=data.map(row=>{
+        while(row.length<headers.length) row.push("");
+        return row;
+      });
+      cb(headers,data);
+    }
+  });
+}
+
+/* FIREBASE MERGE */
+async function mergeFirebase(data, headers){
+  const snap = await db.ref("golfplan").once("value");
+  if(!snap.exists()) return data;
+
+  const fb = snap.val();
+
+  return data.map(row=>{
+    const key=createKey(row[0],row[1]);
+    if(!fb[key]) return row;
+
+    Object.entries(fb[key]).forEach(([player,val])=>{
+      const i=headers.indexOf(player);
+      if(i!==-1) row[i]=val==="1"?"x":val;
+    });
+
+    return row;
+  });
+}
+
+/* CLICK */
 function enableClick(headers){
 
-  // 👉 Einfach-Klick → Datum Popup
+  // 👉 Datum klick → Popup
   $('#golfTable tbody').on('click','td',function(){
 
     const col = tableInstance.column(this).index();
@@ -177,7 +209,7 @@ function enableClick(headers){
     }
   });
 
-  // 👉 Doppelklick → Toggle X
+  // 👉 Doppelklick → Toggle
   $('#golfTable tbody').on('dblclick','td',function(){
 
     const cell = tableInstance.cell(this);
@@ -223,7 +255,7 @@ function initTable(headers,data){
 
   tableInstance=$("#golfTable").DataTable({
 
-    dom:'Brt',
+    dom:'t',   // 🔥 WICHTIG → keine Buttons mehr
     paging:false,
     autoWidth:false,
 
@@ -258,6 +290,7 @@ function initTable(headers,data){
     createdRow:(row,rowData)=>{
       if(isWeekend(rowData[0])) row.classList.add("weekend");
     }
+
   });
 
   enableClick(headers);
@@ -266,44 +299,13 @@ function initTable(headers,data){
 /* START */
 document.addEventListener("DOMContentLoaded",()=>{
 
-  Papa.parse(CONFIG.csvUrl,{
-    download:true,
-    delimiter:CONFIG.delimiter,
-    complete: async r=>{
-      const headers=r.data[0];
-      let data=r.data.slice(1);
-      data=data.map(row=>{
-        while(row.length<headers.length) row.push("");
-        return row;
-      });
-
-      const merged = await mergeFirebase(data,headers);
-      initTable(headers,merged);
-      initChips();
-    }
+  loadCsv(async (headers,data)=>{
+    const merged=await mergeFirebase(data,headers);
+    initTable(headers,merged);
+    initChips();
   });
 
 });
-
-/* FIREBASE MERGE */
-async function mergeFirebase(data, headers){
-  const snap = await db.ref("golfplan").once("value");
-  if(!snap.exists()) return data;
-
-  const fb = snap.val();
-
-  return data.map(row=>{
-    const key=createKey(row[0],row[1]);
-    if(!fb[key]) return row;
-
-    Object.entries(fb[key]).forEach(([player,val])=>{
-      const i=headers.indexOf(player);
-      if(i!==-1) row[i]=val==="1"?"x":val;
-    });
-
-    return row;
-  });
-}
 
 </script>
 
