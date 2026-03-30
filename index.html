@@ -353,33 +353,67 @@ async function mergeFirebase(data, headers){
 /* CLICK */
 function enableClick(headers){
 
-  $('#golfTable tbody').on('click','td',function(){
+function enableClick(headers){
 
-    const cell = tableInstance.cell(this);
-    const rowIndex = cell.index().row;
-    const col = tableInstance.column(this).index();
-    const rowData = tableInstance.row(rowIndex).data();
+  let pressTimer = null;
+  let isLongPress = false;
 
-    if(col === CONFIG.columns.date){
-      showPlayersPopup(rowData[0], rowData, headers);
-      return;
-    }
-
-    if(col < CONFIG.columns.nameStart) return;
-
-    const player=headers[col];
-    const key=createKey(rowData[0],rowData[1]);
-
-    const newVal = rowData[col]==="x"?"":"x";
-    rowData[col]=newVal;
-
-    tableInstance.row(rowIndex).data(rowData).invalidate().draw(false);
-
-    db.ref("golfplan/"+key).update({
-      [player]: newVal
+  // 👉 START
+    $('#golfTable tbody').on('touchstart mousedown', 'td', function(e){
+  
+      const cellEl = this;
+      isLongPress = false;
+  
+      pressTimer = setTimeout(() => {
+        isLongPress = true;
+  
+        const cell = tableInstance.cell(cellEl);
+        const rowIndex = cell.index().row;
+        const col = tableInstance.column(cellEl).index();
+  
+        if(col < CONFIG.columns.nameStart) return;
+  
+        const rowData = tableInstance.row(rowIndex).data();
+        const player = headers[col];
+        const key = createKey(rowData[0], rowData[1]);
+  
+        const newVal = rowData[col] === "x" ? "" : "x";
+        rowData[col] = newVal;
+  
+        tableInstance
+          .row(rowIndex)
+          .data(rowData)
+          .invalidate()
+          .draw(false);
+  
+        db.ref("golfplan/"+key).update({
+          [player]: newVal
+        });
+  
+      }, 400);
     });
-  });
-}
+  
+    // 👉 STOP
+    $('#golfTable tbody').on('touchend mouseup mouseleave', 'td', function(){
+      clearTimeout(pressTimer);
+    });
+  
+    // 👉 NORMALER KLICK (Popup)
+    $('#golfTable tbody').on('click','td',function(e){
+  
+      if(isLongPress) return;
+  
+      const col = tableInstance.column(this).index();
+      const rowData = tableInstance
+        .row(tableInstance.cell(this).index().row)
+        .data();
+  
+      if(col === CONFIG.columns.date){
+        showPlayersPopup(rowData[0], rowData, headers);
+      }
+    });
+  
+  }
 
 /* CHIPS */
 function initChips(){
