@@ -5,10 +5,7 @@
 <title>Teneriffa 2026/2027</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- ==========================================================
-   LIBRARIES
-   ========================================================== -->
-
+<!-- LIBRARIES -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.3.0/css/fixedColumns.dataTables.min.css">
@@ -31,77 +28,49 @@
 
 <style>
 
-/* ==========================================================
-   BASIC LAYOUT
-   ========================================================== */
-
-body {
-  font-family: Arial;
-  margin:15px;
-  background:#f2f4f7;
-  font-size:13px;
-}
-
+/* BASIC */
+body { font-family: Arial; margin:15px; background:#f2f4f7; font-size:13px; }
 h1 { margin-bottom:10px; }
 
-/* ==========================================================
-   FILTER CHIPS
-   ========================================================== */
+/* CHIPS */
+.toolbar { margin-bottom:15px; display:flex; flex-wrap:wrap; gap:8px; }
+.chip { padding:6px 14px; border-radius:20px; background:#e3e8ee; cursor:pointer; }
+.chip.active { background:#2c3e50; color:#fff; }
 
-.toolbar {
-  margin-bottom:15px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-}
+/* TABLE */
+#golfTable th, #golfTable td { border-right:2px solid #d0d7de; text-align:center; }
+#golfTable th:last-child, #golfTable td:last-child { border-right:none; }
+#golfTable thead th { text-align:center !important; vertical-align:middle; }
+.weekend td:first-child { font-weight:bold; }
 
-.chip {
-  padding:6px 14px;
-  border-radius:20px;
-  background:#e3e8ee;
-  cursor:pointer;
-}
-
-.chip.active {
-  background:#2c3e50;
-  color:#fff;
-}
-
-/* ==========================================================
-   TABLE STYLING
-   ========================================================== */
-
-#golfTable th, #golfTable td {
-  border-right:2px solid #d0d7de;
-  text-align:center;
-}
-
-#golfTable th:last-child,
-#golfTable td:last-child {
-  border-right:none;
-}
-
-#golfTable thead th {
-  text-align:center !important;
-  vertical-align:middle;
-}
-
-.weekend td:first-child {
-  font-weight:bold;
-}
-
-/* kompakte Spieler-Spalten */
 #golfTable th:nth-child(n+7),
-#golfTable td:nth-child(n+7) {
-  width:50px;
-  font-size:11px;
+#golfTable td:nth-child(n+7) { width:50px; font-size:11px; }
+
+/* X */
+.player-x { color:#27ae60 !important; font-weight:bold !important; }
+
+/* POPUP */
+.popup-overlay {
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.4);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:999;
 }
 
-/* X Darstellung */
-.player-x {
-  color:#27ae60 !important;
-  font-weight:bold !important;
+.popup {
+  background:#fff;
+  padding:20px;
+  border-radius:10px;
+  min-width:250px;
+  box-shadow:0 5px 20px rgba(0,0,0,0.2);
 }
+
+.popup h3 { margin-top:0; }
+.popup-close { margin-top:10px; cursor:pointer; color:#3498db; }
 
 </style>
 </head>
@@ -109,10 +78,6 @@ h1 { margin-bottom:10px; }
 <body>
 
 <h1>Teneriffa 2026/2027</h1>
-
-<!-- ==========================================================
-   FILTER UI
-   ========================================================== -->
 
 <div class="toolbar">
   <div class="chip active" data-ort="">Alle</div>
@@ -125,117 +90,119 @@ h1 { margin-bottom:10px; }
 </div>
 
 <table id="golfTable" class="display nowrap" style="width:100%">
-  <thead></thead>
-  <tbody></tbody>
+<thead></thead>
+<tbody></tbody>
 </table>
 
 <script>
 
-/* ==========================================================
-   CONFIGURATION
-   ========================================================== */
-
+/* CONFIG */
 const CONFIG = {
   csvUrl: "https://dariolorenzon.github.io/Teneriffa/golfplan.csv",
   delimiter: ";",
-  columns: {
-    date: 0,
-    ort: 1,
-    nameStart: 6
-  }
+  columns: { date:0, ort:1, nameStart:6 }
 };
 
-/* ==========================================================
-   FIREBASE INIT
-   ========================================================== */
-
-const firebaseConfig = {
+/* FIREBASE */
+firebase.initializeApp({
   apiKey: "AIzaSyBl7CqMFZZq0oZkhs8Zzibq_6wiSikAcXE",
   databaseURL: "https://tee-times-teneriffa-default-rtdb.europe-west1.firebasedatabase.app"
-};
-
-firebase.initializeApp(firebaseConfig);
+});
 const db = firebase.database();
 
 let tableInstance;
 
-/* ==========================================================
-   HELPER FUNCTIONS
-   ========================================================== */
-
-// Datum → Date Objekt
+/* HELPERS */
 function parseDate(str){
   const [d,m,y] = str.split(".");
   return new Date(y, m-1, d);
 }
 
-// Wochenende prüfen
 function isWeekend(dateStr){
   const day = parseDate(dateStr).getDay();
   return day === 0 || day === 6;
 }
 
-// Firebase Key erstellen
 function createKey(date, ort){
-  if(!date || !ort) return null;
   const [d,m,y] = date.split(".");
   return `${y}-${m}-${d}_${ort}`;
 }
 
-/* ==========================================================
-   DATA HANDLING
-   ========================================================== */
+/* POPUP */
+function showPlayersPopup(date, rowData, headers){
 
-// CSV laden
-function loadCsv(callback){
-  Papa.parse(CONFIG.csvUrl, {
-    download: true,
-    delimiter: CONFIG.delimiter,
-    complete: result => {
+  const players = [];
 
-      const headers = result.data[0];
-      let data = result.data.slice(1);
+  for(let i = CONFIG.columns.nameStart; i < headers.length; i++){
+    if(rowData[i] === "x"){
+      players.push(headers[i]);
+    }
+  }
 
-      // Zeilen auffüllen
-      data = data.map(row => {
-        while(row.length < headers.length) row.push("");
+  const overlay = document.createElement("div");
+  overlay.className = "popup-overlay";
+
+  const popup = document.createElement("div");
+  popup.className = "popup";
+
+  popup.innerHTML = `
+    <h3>${date}</h3>
+    ${
+      players.length
+        ? `<ul>${players.map(p => `<li>${p}</li>`).join("")}</ul>`
+        : "<p>Keine Spieler</p>"
+    }
+    <div class="popup-close">Schliessen</div>
+  `;
+
+  overlay.appendChild(popup);
+  document.body.appendChild(overlay);
+
+  overlay.onclick = (e)=>{
+    if(e.target === overlay || e.target.classList.contains("popup-close")){
+      overlay.remove();
+    }
+  };
+}
+
+/* CSV */
+function loadCsv(cb){
+  Papa.parse(CONFIG.csvUrl,{
+    download:true,
+    delimiter:CONFIG.delimiter,
+    complete:r=>{
+      const headers=r.data[0];
+      let data=r.data.slice(1);
+      data=data.map(row=>{
+        while(row.length<headers.length) row.push("");
         return row;
       });
-
-      callback(headers, data);
+      cb(headers,data);
     }
   });
 }
 
-// Firebase Daten mergen
+/* FIREBASE MERGE */
 async function mergeFirebase(data, headers){
-
   const snap = await db.ref("golfplan").once("value");
   if(!snap.exists()) return data;
 
   const fb = snap.val();
 
-  return data.map(row => {
+  return data.map(row=>{
+    const key=createKey(row[0],row[1]);
+    if(!fb[key]) return row;
 
-    const key = createKey(row[0], row[1]);
-    if(!key || !fb[key]) return row;
-
-    Object.entries(fb[key]).forEach(([player, val]) => {
-      const idx = headers.indexOf(player);
-      if(idx !== -1){
-        row[idx] = val === "1" ? "x" : val;
-      }
+    Object.entries(fb[key]).forEach(([player,val])=>{
+      const i=headers.indexOf(player);
+      if(i!==-1) row[i]=val==="1"?"x":val;
     });
 
     return row;
   });
 }
 
-/* ==========================================================
-   UI / INTERACTIONS
-   ========================================================== */
-
-// Klick auf Zelle → Toggle X
+/* CLICK */
 function enableClick(headers){
 
   $('#golfTable tbody').on('click','td',function(){
@@ -243,132 +210,109 @@ function enableClick(headers){
     const cell = tableInstance.cell(this);
     const rowIndex = cell.index().row;
     const col = tableInstance.column(this).index();
+    const rowData = tableInstance.row(rowIndex).data();
+
+    // 👉 Datum klick → Popup
+    if(col === CONFIG.columns.date){
+      showPlayersPopup(rowData[0], rowData, headers);
+      return;
+    }
 
     if(col < CONFIG.columns.nameStart) return;
 
-    const rowData = tableInstance.row(rowIndex).data();
+    const player=headers[col];
+    const key=createKey(rowData[0],rowData[1]);
 
-    const player = headers[col];
-    const key = createKey(rowData[0], rowData[1]);
+    const newVal = rowData[col]==="x"?"":"x";
+    rowData[col]=newVal;
 
-    const newVal = rowData[col] === "x" ? "" : "x";
-    rowData[col] = newVal;
+    tableInstance.row(rowIndex).data(rowData).invalidate().draw(false);
 
-    tableInstance
-      .row(rowIndex)
-      .data(rowData)
-      .invalidate()
-      .draw(false);
-
-    db.ref("golfplan/" + key).update({
+    db.ref("golfplan/"+key).update({
       [player]: newVal
     });
   });
 }
 
-// Filter Chips
+/* CHIPS */
 function initChips(){
-  document.querySelectorAll(".chip").forEach(chip => {
-    chip.onclick = () => {
-
-      document.querySelectorAll(".chip")
-        .forEach(c => c.classList.remove("active"));
-
+  document.querySelectorAll(".chip").forEach(chip=>{
+    chip.onclick=()=>{
+      document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
       chip.classList.add("active");
-
-      tableInstance
-        .column(CONFIG.columns.ort)
+      tableInstance.column(CONFIG.columns.ort)
         .search(chip.dataset.ort)
         .draw();
     };
   });
 }
 
-/* ==========================================================
-   TABLE INITIALIZATION
-   ========================================================== */
+/* TABLE */
+function initTable(headers,data){
 
-function initTable(headers, data){
-
-  // Header bauen
   document.querySelector("#golfTable thead").innerHTML =
-    `<tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
+    `<tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr>`;
 
-  tableInstance = $("#golfTable").DataTable({
+  tableInstance=$("#golfTable").DataTable({
 
-    dom: 'Brt',
-    paging: false,
-    autoWidth: false,
-    stateSave: true,
+    dom:'Brt',
+    paging:false,
+    autoWidth:false,
+    stateSave:true,
 
-    buttons: [
+    buttons:[
       { extend:'colvis', text:'Spalten ein/ausblenden' },
       { extend:'excelHtml5', text:'Excel Export' }
     ],
 
-    data: data,
+    data:data,
+    scrollX:true,
+    scrollY:"70vh",
+    order:[[CONFIG.columns.date,"asc"]],
+    fixedColumns:{ leftColumns:2 },
+    fixedHeader:true,
 
-    scrollX: true,
-    scrollY: "70vh",
+    columnDefs:[
 
-    order: [[CONFIG.columns.date, "asc"]],
-
-    fixedColumns: { leftColumns: 2 },
-    fixedHeader: true,
-
-    columnDefs: [
-
-      // Datum sortieren
       {
-        targets: CONFIG.columns.date,
-        render: function(data, type){
-          if(type === "sort"){
-            return parseDate(data).getTime();
-          }
+        targets:CONFIG.columns.date,
+        render:(data,type)=>{
+          if(type==="sort") return parseDate(data).getTime();
           return data;
         }
       },
 
-      // Spieler-Spalten
       {
-        targets: index => index >= CONFIG.columns.nameStart,
-        render: function(data, type){
-
-          if(type === "display"){
-            return data === "x"
+        targets:index=>index>=CONFIG.columns.nameStart,
+        render:(data,type)=>{
+          if(type==="display"){
+            return data==="x"
               ? '<span class="player-x">x</span>'
               : "";
           }
-
-          return data === "x" ? "x" : "";
+          return data==="x"?"x":"";
         }
       }
     ],
 
-    // Wochenende markieren
-    createdRow: (row, rowData) => {
-      if(isWeekend(rowData[CONFIG.columns.date])){
-        row.classList.add("weekend");
-      }
+    createdRow:(row,rowData)=>{
+      if(isWeekend(rowData[0])) row.classList.add("weekend");
     }
+
   });
 
   enableClick(headers);
 }
 
-/* ==========================================================
-   APP START
-   ========================================================== */
+/* START */
+document.addEventListener("DOMContentLoaded",()=>{
 
-document.addEventListener("DOMContentLoaded", () => {
-
-  loadCsv(async (headers, data) => {
-
-    const merged = await mergeFirebase(data, headers);
-
-    initTable(headers, merged);
+  loadCsv(async (headers,data)=>{
+    const merged=await mergeFirebase(data,headers);
+    initTable(headers,merged);
     initChips();
   });
+
 });
 
 </script>
