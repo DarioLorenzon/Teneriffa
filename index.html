@@ -24,6 +24,31 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 <style>
+
+/* Buttons oben links */
+.top-buttons {
+  margin-bottom:10px;
+}
+
+.top-buttons .dt-buttons {
+  display:flex;
+  gap:10px;
+}
+
+/* Optional: schöner Style */
+.dt-button {
+  background:#2c3e50 !important;
+  color:white !important;
+  border:none !important;
+  border-radius:6px !important;
+  padding:6px 12px !important;
+  font-size:12px;
+}
+
+.dt-button:hover {
+  background:#1a252f !important;
+}
+  
 body { font-family: Arial; margin:15px; background:#f2f4f7; font-size:13px; }
 
 .header { display:flex; justify-content:space-between; margin-bottom:15px; }
@@ -257,14 +282,21 @@ function initTable(headers,data){
 
   tableInstance=$("#golfTable").DataTable({
 
-    dom:'Brt',   // 👈 wichtig
+    dom: '<"top-buttons"B>rt',  
 
     paging:false,
     autoWidth:false,
 
-    buttons:[
-      { extend:'colvis', text:'Spalten ein/ausblenden' }
-    ],
+      buttons: [
+        {
+          extend: 'colvis',
+          text: 'Spalten ein/ausblenden'
+        },
+        {
+          extend: 'excelHtml5',
+          text: 'Excel Export'
+        }
+      ],
 
     data:data,
     scrollX:true,
