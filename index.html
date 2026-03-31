@@ -215,6 +215,17 @@ body {
   scroll-snap-align: center;
 }
 
+/* Buttons linksbündig */
+.top-buttons {
+  display:flex;
+  justify-content:flex-start;
+  margin-bottom:10px;
+}
+
+.top-buttons .dt-buttons {
+  display:flex;
+  gap:10px;
+}
   
 </style>
 </head>
@@ -405,7 +416,7 @@ function initTable(headers,data){
 
   tableInstance=$("#golfTable").DataTable({
 
-    dom:'Brt',
+    dom: '<"top-buttons"B>rt',
     paging:false,
     autoWidth:false,
     stateSave:true,
