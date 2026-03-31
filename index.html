@@ -255,9 +255,14 @@ function initTable(headers,data){
 
   tableInstance=$("#golfTable").DataTable({
 
-    dom:'t',   // 🔥 WICHTIG → keine Buttons mehr
+    dom:'Brt',   // 👈 wichtig
+
     paging:false,
     autoWidth:false,
+
+    buttons:[
+      { extend:'colvis', text:'Spalten ein/ausblenden' }
+    ],
 
     data:data,
     scrollX:true,
