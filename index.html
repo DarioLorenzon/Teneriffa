@@ -30,16 +30,7 @@
 
 /* ================= BASIC ================= */
 
-<div id="userPopup" style="
-  position:fixed;
-  top:0; left:0;
-  width:100%; height:100%;
-  background:rgba(0,0,0,0.5);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:9999;
-">
+
   <div style="
     background:white;
     padding:20px;
@@ -257,6 +248,17 @@ body {
 
 <body>
 
+<div id="userPopup" style="
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.5);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+">
+
 <!-- HEADER -->
 <div class="header">
   <div>
@@ -302,26 +304,6 @@ document.getElementById("saveUser").onclick = () => {
   document.getElementById("userPopup").style.display = "none";
 
   applyUserFilter();
-
-  function applyUserFilter(){
-  if(!tableInstance) return;
-
-  const ort = currentUserKey;
-
-  // Chips setzen
-  document.querySelectorAll(".chip").forEach(c=>{
-    c.classList.remove("active");
-    if(c.dataset.ort === ort){
-      c.classList.add("active");
-    }
-  });
-
-  // Tabelle filtern
-  tableInstance
-    .column(CONFIG.columns.ort)
-    .search(ort)
-    .draw();
-}
 };
   
 /* CONFIG */
@@ -340,6 +322,26 @@ const db = firebase.database();
 
 let tableInstance;
 
+function applyUserFilter(){
+  if(!tableInstance) return;
+
+  const ort = currentUserKey;
+
+  // Chips setzen
+  document.querySelectorAll(".chip").forEach(c=>{
+    c.classList.remove("active");
+    if(c.dataset.ort === ort){
+      c.classList.add("active");
+    }
+  });
+
+  // Tabelle filtern
+  tableInstance
+    .column(CONFIG.columns.ort)
+    .search(ort)
+    .draw();
+}
+  
 /* HELPERS */
 function parseDate(str){
   const [d,m,y] = str.split(".");
