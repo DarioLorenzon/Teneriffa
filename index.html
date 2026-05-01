@@ -25,214 +25,43 @@
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
 <style>
+body { font-family: Arial; margin:15px; background:#f2f4f7; font-size:13px; }
+.header { display:flex; justify-content:space-between; margin-bottom:15px; }
+.header h1 { margin:0; font-size:20px; }
+.subtitle { font-size:12px; color:#7f8c8d; }
 
-/* ================= BASIC ================= */
-
-body {
-  font-family: Arial;
-  margin:15px;
-  background:#f2f4f7;
-  font-size:13px;
-}
-
-/* Header */
-.header {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:15px;
-}
-
-.header h1 {
-  margin:0;
-  font-size:20px;
-  font-weight:600;
-}
-
-.subtitle {
-  font-size:12px;
-  color:#7f8c8d;
-}
-
-/* ================= CHIPS ================= */
-
-.toolbar {
-  margin-bottom:15px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-}
+.toolbar { margin-bottom:15px; display:flex; flex-wrap:wrap; gap:8px; }
 
 .chip {
   padding:6px 14px;
   border-radius:20px;
   background:#e3e8ee;
   cursor:pointer;
-  transition:0.2s;
 }
-
-.chip:hover {
-  background:#d5dde6;
-}
-
-.chip.active {
-  background:#2c3e50;
-  color:#fff;
-  box-shadow:0 2px 6px rgba(0,0,0,0.15);
-}
-
-/* ================= TABLE ================= */
+.chip.active { background:#2c3e50; color:#fff; }
 
 #golfTable th, #golfTable td {
   border-right:2px solid #d0d7de;
   text-align:center;
 }
-
-#golfTable th:last-child,
-#golfTable td:last-child {
-  border-right:none;
-}
-
-#golfTable thead th {
-  text-align:center !important;
-  vertical-align:middle;
-}
-
-/* Hover Effekt */
-#golfTable tbody td:hover {
-  background:#f0f7ff;
-  cursor:pointer;
-  transition:0.15s;
-}
-
-#golfTable tbody td:active {
-  background:#d6eaff;
-}
-
-/* Wochenende */
-.weekend td {
-  background:#fafafa;
-}
-
-.weekend td:first-child {
-  font-weight:bold;
-}
-
-/* kompakte Spieler-Spalten */
-#golfTable th:nth-child(n+7),
-#golfTable td:nth-child(n+7) {
-  width:50px;
-  font-size:11px;
-}
-
-/* X als Badge */
 .player-x {
   display:inline-flex;
-  align-items:center;
   justify-content:center;
   width:18px;
   height:18px;
   border-radius:50%;
   background:#27ae60;
-  color:white !important;
+  color:white;
   font-size:12px;
-  font-weight:bold;
 }
-
-/* ================= POPUP ================= */
-
-.popup-overlay {
-  position: fixed;
-  top:0; left:0;
-  width:100%; height:100%;
-  background:rgba(0,0,0,0.4);
-  display:flex;
-  align-items:flex-end;
-  justify-content:center;
-  z-index:999;
-  animation: fadeIn 0.2s ease;
-}
-
-.popup {
-  background:#fff;
-  width:100%;
-  max-height:80%;
-  border-radius:16px 16px 0 0;
-  padding:20px;
-  overflow-y:auto;
-  animation: slideUp 0.25s ease;
-  box-shadow:0 -5px 30px rgba(0,0,0,0.15);
-}
-
-@media (min-width:768px){
-  .popup-overlay { align-items:center; }
-
-  .popup {
-    width:350px;
-    border-radius:12px;
-  }
-}
-
-.popup h3 {
-  margin:0 0 10px 0;
-  font-size:18px;
-  font-weight:600;
-  text-align:center;
-}
-
-.popup ul { padding-left:20px; }
-
-.popup-close {
-  position:absolute;
-  top:10px;
-  right:15px;
-  font-size:18px;
-  cursor:pointer;
-}
-
-@keyframes slideUp {
-  from { transform:translateY(100%); }
-  to { transform:translateY(0); }
-}
-
-@keyframes fadeIn {
-  from { opacity:0; }
-  to { opacity:1; }
-}
-
-/* ================= SCROLL OPTIMIERUNG ================= */
-
-.dataTables_scrollBody {
-  -webkit-overflow-scrolling: touch; /* iOS smoother */
-  overscroll-behavior: contain;     /* weniger „springen“ */
-  scroll-snap-type: x proximity;    /* sanftes Einrasten */
-}
-
-#golfTable th,
-#golfTable td {
-  scroll-snap-align: center;
-}
-
-/* Buttons linksbündig */
-.top-buttons {
-  display:flex;
-  justify-content:flex-start;
-  margin-bottom:10px;
-}
-
-.top-buttons .dt-buttons {
-  display:flex;
-  gap:10px;
-}
-  
 </style>
 </head>
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
   <div>
     <h1>Teneriffa 2026/2027</h1>
@@ -240,7 +69,6 @@ body {
   </div>
 </div>
 
-<!-- FILTER -->
 <div class="toolbar">
   <div class="chip active" data-ort="">Alle</div>
   <div class="chip" data-ort="AM">AM</div>
@@ -258,222 +86,124 @@ body {
 
 <script>
 
-/* CONFIG */
 const CONFIG = {
   csvUrl: "https://dariolorenzon.github.io/Teneriffa/golfplan.csv",
   delimiter: ";",
   columns: { date:0, ort:1, nameStart:6 }
 };
 
-/* FIREBASE */
 firebase.initializeApp({
   apiKey: "AIzaSyBl7CqMFZZq0oZkhs8Zzibq_6wiSikAcXE",
   databaseURL: "https://tee-times-teneriffa-default-rtdb.europe-west1.firebasedatabase.app"
 });
+
 const db = firebase.database();
+const auth = firebase.auth();
+let currentUser = null;
+
+auth.signInAnonymously();
+
+auth.onAuthStateChanged(async (user)=>{
+  if(!user) return;
+  currentUser = user;
+
+  const snap = await db.ref("filters/" + user.uid).once("value");
+
+  if(snap.exists()){
+    const ort = snap.val().ort || "";
+
+    document.querySelectorAll(".chip").forEach(c=>{
+      c.classList.remove("active");
+      if(c.dataset.ort === ort) c.classList.add("active");
+    });
+
+    if(tableInstance){
+      tableInstance.column(CONFIG.columns.ort).search(ort).draw();
+    }
+  }
+});
 
 let tableInstance;
 
-/* HELPERS */
-function parseDate(str){
-  const [d,m,y] = str.split(".");
-  return new Date(y, m-1, d);
-}
-
-function isWeekend(dateStr){
-  const day = parseDate(dateStr).getDay();
-  return day === 0 || day === 6;
-}
-
-function createKey(date, ort){
-  const [d,m,y] = date.split(".");
-  return `${y}-${m}-${d}_${ort}`;
-}
-
-/* POPUP */
-function showPlayersPopup(date, rowData, headers){
-
-  const players = [];
-
-  for(let i = CONFIG.columns.nameStart; i < headers.length; i++){
-    if(rowData[i] === "x"){
-      players.push(headers[i]);
-    }
-  }
-
-  const overlay = document.createElement("div");
-  overlay.className = "popup-overlay";
-
-  const popup = document.createElement("div");
-  popup.className = "popup";
-
-  popup.innerHTML = `
-    <div class="popup-close">✕</div>
-    <h3>${date}</h3>
-    ${
-      players.length
-        ? `<ul>${players.map(p => `<li>${p}</li>`).join("")}</ul>`
-        : "<p style='text-align:center;'>Keine Spieler eingetragen</p>"
-    }
-  `;
-
-  overlay.appendChild(popup);
-  document.body.appendChild(overlay);
-
-  overlay.addEventListener("click", (e)=>{
-    if(e.target === overlay || e.target.classList.contains("popup-close")){
-      overlay.remove();
-    }
-  });
-}
-
-/* CSV */
 function loadCsv(cb){
   Papa.parse(CONFIG.csvUrl,{
     download:true,
     delimiter:CONFIG.delimiter,
     complete:r=>{
       const headers=r.data[0];
-      let data=r.data.slice(1);
-      data=data.map(row=>{
-        while(row.length<headers.length) row.push("");
-        return row;
-      });
+      const data=r.data.slice(1);
       cb(headers,data);
     }
   });
 }
 
-/* FIREBASE MERGE */
 async function mergeFirebase(data, headers){
   const snap = await db.ref("golfplan").once("value");
   if(!snap.exists()) return data;
-
   const fb = snap.val();
 
   return data.map(row=>{
-    const key=createKey(row[0],row[1]);
+    const key = row[0]+"_"+row[1];
     if(!fb[key]) return row;
 
-    Object.entries(fb[key]).forEach(([player,val])=>{
-      const i=headers.indexOf(player);
-      if(i!==-1) row[i]=val==="1"?"x":val;
+    Object.entries(fb[key]).forEach(([p,v])=>{
+      const i=headers.indexOf(p);
+      if(i!==-1) row[i]=v==="1"?"x":v;
     });
-
     return row;
   });
 }
 
-/* CLICK */
-function enableClick(headers){
-
-  $('#golfTable tbody').on('dblclick','td',function(){
-
-    const cell = tableInstance.cell(this);
-    const rowIndex = cell.index().row;
-    const col = tableInstance.column(this).index();
-    const rowData = tableInstance.row(rowIndex).data();
-
-    if(col === CONFIG.columns.date){
-      showPlayersPopup(rowData[0], rowData, headers);
-      return;
-    }
-
-    if(col < CONFIG.columns.nameStart) return;
-
-    const player=headers[col];
-    const key=createKey(rowData[0],rowData[1]);
-
-    const newVal = rowData[col]==="x"?"":"x";
-    rowData[col]=newVal;
-
-    tableInstance.row(rowIndex).data(rowData).invalidate().draw(false);
-
-    db.ref("golfplan/"+key).update({
-      [player]: newVal
-    });
-  });
-}
-
-/* CHIPS */
 function initChips(){
   document.querySelectorAll(".chip").forEach(chip=>{
     chip.onclick=()=>{
+
       document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
       chip.classList.add("active");
-      tableInstance.column(CONFIG.columns.ort)
-        .search(chip.dataset.ort)
-        .draw();
+
+      const ort = chip.dataset.ort;
+
+      tableInstance.column(CONFIG.columns.ort).search(ort).draw();
+
+      if(currentUser){
+        db.ref("filters/"+currentUser.uid).set({ ort: ort });
+      }
     };
   });
 }
 
-/* TABLE */
 function initTable(headers,data){
 
   document.querySelector("#golfTable thead").innerHTML =
     `<tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr>`;
 
   tableInstance=$("#golfTable").DataTable({
-
-    dom: '<"top-buttons"B>rt',
+    dom:'<"top-buttons"B>rt',
     paging:false,
-    autoWidth:false,
     stateSave:true,
-
     buttons:[
       { extend:'colvis', text:'Spalten ein/ausblenden' },
       { extend:'excelHtml5', text:'Excel Export' }
     ],
-
     data:data,
     scrollX:true,
-    scrollY:"70vh",
-    order:[[CONFIG.columns.date,"asc"]],
-    fixedColumns:{ leftColumns:2 },
-    fixedHeader:true,
-
+    order:[[0,"asc"]],
     columnDefs:[
-
       {
-        targets:CONFIG.columns.date,
-        render:(data,type)=>{
-          if(type==="sort") return parseDate(data).getTime();
-          return data;
-        }
-      },
-
-      {
-        targets:index=>index>=CONFIG.columns.nameStart,
-        render:(data,type)=>{
-          if(type==="display"){
-            return data==="x"
-              ? '<span class="player-x">x</span>'
-              : "";
-          }
-          return data==="x"?"x":"";
-        }
+        targets:i=>i>=CONFIG.columns.nameStart,
+        render:(d)=> d==="x" ? '<span class="player-x">x</span>' : ""
       }
-    ],
-
-    createdRow:(row,rowData)=>{
-      if(isWeekend(rowData[0])) row.classList.add("weekend");
-    }
-
+    ]
   });
 
-  enableClick(headers);
+  initChips();
 }
 
-/* START */
 document.addEventListener("DOMContentLoaded",()=>{
-
   loadCsv(async (headers,data)=>{
-    const merged=await mergeFirebase(data,headers);
+    const merged = await mergeFirebase(data,headers);
     initTable(headers,merged);
-    initChips();
   });
-
 });
 
 </script>
